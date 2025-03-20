@@ -3,9 +3,8 @@ use compact_str::CompactString;
 use petgraph::graph::NodeIndex;
 use petgraph::Graph;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet};
 use std::{
-    collections::HashSet,
     fs,
     path::{Path, PathBuf},
 };
@@ -46,7 +45,7 @@ impl WorkspaceMemberGlobs {
         workspace_root: impl AsRef<Path>,
     ) -> anyhow::Result<impl IntoIterator<Item = PathBuf>> {
         let workspace_root = workspace_root.as_ref();
-        let mut package_json_paths = HashSet::<PathBuf>::new();
+        let mut package_json_paths = HashSet::<PathBuf>::default();
         // TODO: parallelize this
         for mut inclusion in self.inclusions {
             inclusion.push_str(if inclusion.ends_with('/') {
