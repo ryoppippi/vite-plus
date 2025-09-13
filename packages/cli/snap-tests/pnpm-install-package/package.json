@@ -1,0 +1,6 @@
+{
+  "name": "pnpm-install-package",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.15.1"
+}

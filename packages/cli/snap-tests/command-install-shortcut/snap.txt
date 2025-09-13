@@ -1,0 +1,43 @@
+> vite-plus i tslib@2.8.1 # install shortcut
+Cache not found
+Packages: +<variable>
++<repeat>
+Progress: resolved <variable>, reused <variable>, downloaded <variable>, added <variable>, done
+
+dependencies:
++ tslib <semver>
+
+Done in <variable>ms using pnpm v<semver>
+
+> cat package.json # add tslib@2.8.1 to package.json
+{
+  "name": "command-install-shortcut",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.15.1",
+  "dependencies": {
+    "tslib": "2.8.1"
+  }
+}
+
+> vite-plus i tslib@2.8.1 # install shortcut hit cache
+Cache hit, replaying
+Packages: +<variable>
++<repeat>
+Progress: resolved <variable>, reused <variable>, downloaded <variable>, added <variable>, done
+
+dependencies:
++ tslib <semver>
+
+Done in <variable>ms using pnpm v<semver>
+
+> vite-plus install tslib@2.8.1 # install command still hit cache
+Cache hit, replaying
+Packages: +<variable>
++<repeat>
+Progress: resolved <variable>, reused <variable>, downloaded <variable>, added <variable>, done
+
+dependencies:
++ tslib <semver>
+
+Done in <variable>ms using pnpm v<semver>

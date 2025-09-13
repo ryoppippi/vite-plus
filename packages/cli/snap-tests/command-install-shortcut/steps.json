@@ -1,0 +1,11 @@
+{
+  "env": {
+    "VITE_DISABLE_AUTO_INSTALL": "1"
+  },
+  "commands": [
+    "vite-plus i tslib@2.8.1 # install shortcut",
+    "cat package.json # add tslib@2.8.1 to package.json",
+    "vite-plus i tslib@2.8.1 # install shortcut hit cache",
+    "vite-plus install tslib@2.8.1 # install command still hit cache"
+  ]
+}

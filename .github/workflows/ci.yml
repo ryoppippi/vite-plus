@@ -144,7 +144,7 @@ jobs:
 
       - name: Run CLI E2E tests
         run: |
-          pnpm test
+          VITE_LOG=error pnpm test
           git diff --exit-code
 
   install-e2e-test:
