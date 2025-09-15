@@ -2,6 +2,7 @@ mod cache;
 mod cmd;
 mod collections;
 mod config;
+mod doc;
 mod execute;
 mod fingerprint;
 mod fmt;
@@ -100,6 +101,11 @@ pub enum Commands {
         /// Arguments to pass to vite install
         args: Vec<String>,
     },
+    Doc {
+        #[clap(last = true)]
+        /// Arguments to pass to vitepress
+        args: Vec<String>,
+    },
     /// Manage the task cache
     Cache {
         #[clap(subcommand)]
@@ -156,11 +162,16 @@ pub struct CliOptions<
         Box<dyn Future<Output = Result<ResolveCommandResult, Error>>>,
     >,
     TestFn: Fn() -> Test = Box<dyn Fn() -> Test>,
+    Doc: Future<Output = Result<ResolveCommandResult, Error>> = Pin<
+        Box<dyn Future<Output = Result<ResolveCommandResult, Error>>>,
+    >,
+    DocFn: Fn() -> Doc = Box<dyn Fn() -> Doc>,
 > {
     pub lint: LintFn,
     pub fmt: FmtFn,
     pub vite: ViteFn,
     pub test: TestFn,
+    pub doc: DocFn,
 }
 
 pub struct ResolveCommandResult {
@@ -207,10 +218,12 @@ pub async fn main<
     ViteFn: Fn() -> Vite,
     Test: Future<Output = Result<ResolveCommandResult, Error>>,
     TestFn: Fn() -> Test,
+    Doc: Future<Output = Result<ResolveCommandResult, Error>>,
+    DocFn: Fn() -> Doc,
 >(
     cwd: AbsolutePathBuf,
     args: Args,
-    options: Option<CliOptions<Lint, LintFn, Fmt, FmtFn, Vite, ViteFn, Test, TestFn>>,
+    options: Option<CliOptions<Lint, LintFn, Fmt, FmtFn, Vite, ViteFn, Test, TestFn, Doc, DocFn>>,
 ) -> Result<(), Error> {
     // Auto-install dependencies if needed, but skip for install command itself, or if `VITE_DISABLE_AUTO_INSTALL=1` is set.
     if !matches!(args.commands, Some(Commands::Install { .. }))
@@ -281,6 +294,14 @@ pub async fn main<
         }
         Some(Commands::Install { args }) => {
             install::InstallCommand::builder(cwd).build().execute(&args).await?;
+            return Ok(());
+        }
+        Some(Commands::Doc { args }) => {
+            let mut workspace = Workspace::partial_load(cwd)?;
+            if let Some(doc_fn) = options.map(|o| o.doc) {
+                doc::doc(doc_fn, &mut workspace, args).await?;
+                workspace.unload().await?;
+            }
             return Ok(());
         }
         Some(Commands::Cache { subcmd }) => {
@@ -431,6 +452,28 @@ mod tests {
             assert_eq!(args, &vec!["--watch".to_string(), "--coverage".to_string()]);
         } else {
             panic!("Expected Test command");
+        }
+    }
+
+    #[test]
+    fn test_args_doc_command() {
+        let args = Args::try_parse_from(&["vite-plus", "doc"]).unwrap();
+        assert_eq!(args.task, None);
+        assert!(args.task_args.is_empty());
+        assert!(matches!(args.commands, Some(Commands::Doc { .. })));
+        assert!(!args.debug);
+    }
+
+    #[test]
+    fn test_args_doc_command_with_args() {
+        let args =
+            Args::try_parse_from(&["vite-plus", "doc", "--", "--port", "3000", "--host"]).unwrap();
+        assert_eq!(args.task, None);
+        assert!(args.task_args.is_empty());
+        if let Some(Commands::Doc { args }) = &args.commands {
+            assert_eq!(args, &vec!["--port".to_string(), "3000".to_string(), "--host".to_string()]);
+        } else {
+            panic!("Expected Doc command");
         }
     }
 

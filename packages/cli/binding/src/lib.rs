@@ -46,6 +46,8 @@ pub struct CliOptions {
     pub vite: Arc<ThreadsafeFunction<(), Promise<JsCommandResolvedResult>>>,
     /// Resolver function for the test tool (vitest)
     pub test: Arc<ThreadsafeFunction<(), Promise<JsCommandResolvedResult>>>,
+    /// Resolver function for the doc tool (vitepress)
+    pub doc: Arc<ThreadsafeFunction<(), Promise<JsCommandResolvedResult>>>,
     /// Optional working directory override
     pub cwd: Option<String>,
 }
@@ -70,7 +72,7 @@ impl From<JsCommandResolvedResult> for ResolveCommandResult {
     }
 }
 
-static BUILTIN_COMMANDS: &[&str] = &["lint", "fmt", "build", "test"];
+static BUILTIN_COMMANDS: &[&str] = &["lint", "fmt", "build", "test", "doc"];
 
 /// Main entry point for the CLI, called from JavaScript.
 ///
@@ -104,6 +106,7 @@ pub async fn run(options: CliOptions) -> Result<()> {
     let fmt = options.fmt;
     let vite = options.vite;
     let test = options.test;
+    let doc = options.doc;
     // Call the Rust core with wrapped resolver functions
     if let Err(e) = vite_task::main(
         cwd,
@@ -154,6 +157,17 @@ pub async fn run(options: CliOptions) -> Result<()> {
 
                 Ok(resolved.into())
             },
+            // Wrap the doc resolver to be callable from Rust
+            doc: || async {
+                let resolved = doc
+                    .call_async(Ok(()))
+                    .await
+                    .map_err(js_error_to_doc_error)?
+                    .await
+                    .map_err(js_error_to_doc_error)?;
+
+                Ok(resolved.into())
+            },
         }),
     )
     .await
@@ -184,6 +198,11 @@ fn js_error_to_test_error(err: napi::Error) -> Error {
     Error::TestFailed { status: err.status.to_string().into(), reason: err.to_string().into() }
 }
 
+/// Convert JavaScript errors to Rust doc errors
+fn js_error_to_doc_error(err: napi::Error) -> Error {
+    Error::DocFailed { status: err.status.to_string().into(), reason: err.to_string().into() }
+}
+
 fn parse_args() -> Args {
     // ArgsOs [node, vite-plus, ...]
     let mut raw_args = std::env::args_os().skip(2);
@@ -204,6 +223,7 @@ fn parse_args() -> Args {
                     "fmt" => Commands::Fmt { args: forwarded_args },
                     "build" => Commands::Build { args: forwarded_args },
                     "test" => Commands::Test { args: forwarded_args },
+                    "doc" => Commands::Doc { args: forwarded_args },
                     _ => unreachable!(),
                 }),
                 debug: false,

@@ -10,6 +10,7 @@
  */
 
 import { run } from '../binding/index.js';
+import { doc } from './doc.ts';
 import { fmt } from './fmt.ts';
 import { lint } from './lint.ts';
 import { test } from './test.ts';
@@ -22,4 +23,5 @@ run({
   fmt,  // Resolves oxfmt binary for formatting
   vite, // Resolves vite binary for build/dev commands
   test, // Resolves vitest binary for test commands
+  doc,  // Resolves vitepress binary for documentation
 });
