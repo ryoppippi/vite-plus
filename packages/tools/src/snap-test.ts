@@ -32,7 +32,8 @@ const tasks: Promise<void>[] = [];
 for (const caseName of fs.readdirSync(casesDir)) {
   if (caseName.startsWith('.')) continue; // Skip hidden files like .DS_Store
   if (caseName.includes(filter)) {
-    tasks.push(runTestCase(caseName));
+    // tasks.push(runTestCase(caseName));
+    await runTestCase(caseName);
   }
 }
 
