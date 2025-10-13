@@ -278,12 +278,12 @@ mod tests {
 
             // Test recursive topological build
             let task_graph = workspace
-                .build_task_subgraph(&vec!["build".into()], Arc::default(), true)
+                .build_task_subgraph(&["build".into()], Arc::default(), true)
                 .expect("Failed to resolve tasks");
 
             // Verify that all build tasks are included
             let task_names: Vec<_> =
-                task_graph.node_weights().map(|task| task.display_name()).collect();
+                task_graph.node_weights().map(super::ResolvedTask::display_name).collect();
 
             assert!(task_names.contains(&"@test/core#build".into()));
             assert!(task_names.contains(&"@test/utils#build".into()));
@@ -322,7 +322,7 @@ mod tests {
             //     !has_edge("@test/web#build", "@test/utils#build"),
             //     "Web should have edge to utils (It should be indirect via App)"
             // );
-        })
+        });
     }
 
     #[test]
@@ -335,7 +335,7 @@ mod tests {
                 .expect("Failed to load workspace");
 
             let task_graph = workspace
-                .build_task_subgraph(&vec!["@test/web#build".into()], Arc::default(), false)
+                .build_task_subgraph(&["@test/web#build".into()], Arc::default(), false)
                 .expect("Failed to resolve tasks");
 
             let has_edge = |from: &str, to: &str| -> bool {
@@ -366,7 +366,7 @@ mod tests {
 
             // Test @test/utils#lint which has explicit dependencies
             let task_graph = workspace
-                .build_task_subgraph(&vec!["@test/utils#lint".into()], Arc::default(), false)
+                .build_task_subgraph(&["@test/utils#lint".into()], Arc::default(), false)
                 .expect("Failed to resolve tasks");
 
             let has_edge = |from: &str, to: &str| -> bool {
@@ -407,7 +407,7 @@ mod tests {
 
             // Test @test/utils#lint which has explicit dependencies
             let task_graph = workspace
-                .build_task_subgraph(&vec!["@test/utils#lint".into()], Arc::default(), false)
+                .build_task_subgraph(&["@test/utils#lint".into()], Arc::default(), false)
                 .expect("Failed to resolve tasks");
 
             let has_edge = |from: &str, to: &str| -> bool {
@@ -447,12 +447,12 @@ mod tests {
 
             // Test recursive build with topological_run=false
             let task_graph = workspace
-                .build_task_subgraph(&vec!["build".into()], Arc::default(), true)
+                .build_task_subgraph(&["build".into()], Arc::default(), true)
                 .expect("Failed to resolve tasks");
 
             // Verify that all build tasks are included (recursive flag works)
             let task_names: Vec<_> =
-                task_graph.node_weights().map(|task| task.display_name()).collect();
+                task_graph.node_weights().map(super::ResolvedTask::display_name).collect();
 
             assert!(task_names.contains(&"@test/core#build".into()));
             assert!(task_names.contains(&"@test/utils#build".into()));
@@ -496,7 +496,7 @@ mod tests {
                     .expect("Failed to load workspace with topological=true");
 
             let graph_true = workspace_true
-                .build_task_subgraph(&vec!["@test/app#build".into()], Arc::default(), false)
+                .build_task_subgraph(&["@test/app#build".into()], Arc::default(), false)
                 .expect("Failed to resolve tasks");
 
             with_unique_cache_path("topological_comparison_false", |cache_path_false| {
@@ -506,7 +506,7 @@ mod tests {
                         .expect("Failed to load workspace with topological=false");
 
                 let graph_false = workspace_false
-                    .build_task_subgraph(&vec!["@test/app#build".into()], Arc::default(), false)
+                    .build_task_subgraph(&["@test/app#build".into()], Arc::default(), false)
                     .expect("Failed to resolve tasks");
 
                 // Count edges in each graph
@@ -516,9 +516,7 @@ mod tests {
                 // With topological=true, there should be more edges due to implicit dependencies
                 assert!(
                     edge_count_true > edge_count_false,
-                    "Graph with topological=true ({}) should have more edges than topological=false ({})",
-                    edge_count_true,
-                    edge_count_false
+                    "Graph with topological=true ({edge_count_true}) should have more edges than topological=false ({edge_count_false})"
                 );
 
                 // Verify specific edge differences
@@ -555,12 +553,12 @@ mod tests {
             // Test recursive build without topological flag
             // Note: Even without topological flag, cross-package dependencies are now always included
             let task_graph = workspace
-                .build_task_subgraph(&vec!["build".into()], Arc::default(), true)
+                .build_task_subgraph(&["build".into()], Arc::default(), true)
                 .expect("Failed to resolve tasks");
 
             // Verify that all build tasks are included
             let task_names: Vec<_> =
-                task_graph.node_weights().map(|task| task.display_name()).collect();
+                task_graph.node_weights().map(super::ResolvedTask::display_name).collect();
 
             assert!(task_names.contains(&"@test/core#build".into()));
             assert!(task_names.contains(&"@test/utils#build".into()));
@@ -581,7 +579,7 @@ mod tests {
                 has_edge("@test/utils#build(subcommand 0)", "@test/core#build"),
                 "utils should have edge to core"
             );
-        })
+        });
     }
 
     #[test]
@@ -594,7 +592,7 @@ mod tests {
 
             // Test that specifying a scoped task with recursive flag returns an error
             let result = workspace.build_task_subgraph(
-                &vec!["@test/core#build".into()],
+                &["@test/core#build".into()],
                 Arc::default(),
                 true,
             );
@@ -606,7 +604,7 @@ mod tests {
                 }
                 _ => panic!("Expected RecursiveRunWithScope error"),
             }
-        })
+        });
     }
 
     #[test]
@@ -619,12 +617,12 @@ mod tests {
 
             // Test non-recursive build of a single package
             let task_graph = workspace
-                .build_task_subgraph(&vec!["@test/utils#build".into()], Arc::default(), false)
+                .build_task_subgraph(&["@test/utils#build".into()], Arc::default(), false)
                 .expect("Failed to resolve tasks");
 
             // @test/utils has compound commands (3 subtasks) plus dependencies on @test/core#build
             let all_tasks: Vec<_> =
-                task_graph.node_weights().map(|task| task.display_name()).collect();
+                task_graph.node_weights().map(super::ResolvedTask::display_name).collect();
 
             // Should include utils subtasks
             assert!(all_tasks.contains(&"@test/utils#build(subcommand 0)".into()));
@@ -633,7 +631,7 @@ mod tests {
 
             // Should also include dependency on core
             assert!(all_tasks.contains(&"@test/core#build".into()));
-        })
+        });
     }
 
     #[test]
@@ -646,12 +644,12 @@ mod tests {
 
             // Test recursive topological build with compound commands
             let task_graph = workspace
-                .build_task_subgraph(&vec!["build".into()], Arc::default(), true)
+                .build_task_subgraph(&["build".into()], Arc::default(), true)
                 .expect("Failed to resolve tasks");
 
             // Check all tasks including subcommands
             let all_tasks: Vec<_> =
-                task_graph.node_weights().map(|task| task.display_name()).collect();
+                task_graph.node_weights().map(super::ResolvedTask::display_name).collect();
 
             // Utils should have 3 subtasks (indices 0, 1, and None)
             assert!(all_tasks.contains(&"@test/utils#build(subcommand 0)".into()));
@@ -689,7 +687,7 @@ mod tests {
                 has_edge("@test/app#build", "@test/utils#build"),
                 "app should have edge to Utils' last subtask"
             );
-        })
+        });
     }
 
     #[test]
@@ -702,12 +700,12 @@ mod tests {
 
             // Test recursive topological build with transitive dependencies
             let task_graph = workspace
-                .build_task_subgraph(&vec!["build".into()], Arc::default(), true)
+                .build_task_subgraph(&["build".into()], Arc::default(), true)
                 .expect("Failed to resolve tasks");
 
             // Verify that all build tasks are included
             let task_names: Vec<_> =
-                task_graph.node_weights().map(|task| task.display_name()).collect();
+                task_graph.node_weights().map(super::ResolvedTask::display_name).collect();
 
             assert!(
                 task_names.contains(&"@test/a#build".into()),
@@ -733,7 +731,7 @@ mod tests {
                 has_edge("@test/a#build", "@test/c#build"),
                 "A should have edge to C (A depends on C transitively through B)"
             );
-        })
+        });
     }
 
     #[test]
@@ -746,11 +744,11 @@ mod tests {
 
             // Test build task graph
             let build_graph = workspace
-                .build_task_subgraph(&vec!["build".into()], Arc::default(), true)
+                .build_task_subgraph(&["build".into()], Arc::default(), true)
                 .expect("Failed to resolve build tasks");
 
             let build_tasks: Vec<_> =
-                build_graph.node_weights().map(|task| task.display_name()).collect();
+                build_graph.node_weights().map(super::ResolvedTask::display_name).collect();
 
             // Verify all packages with build scripts are included
             assert!(build_tasks.contains(&"@test/shared#build".into()));
@@ -825,11 +823,11 @@ mod tests {
 
             // Test test task graph
             let test_graph = workspace
-                .build_task_subgraph(&vec!["test".into()], Arc::default(), true)
+                .build_task_subgraph(&["test".into()], Arc::default(), true)
                 .expect("Failed to resolve test tasks");
 
             let test_tasks: Vec<_> =
-                test_graph.node_weights().map(|task| task.display_name()).collect();
+                test_graph.node_weights().map(super::ResolvedTask::display_name).collect();
 
             assert!(test_tasks.contains(&"@test/shared#test".into()));
             assert!(test_tasks.contains(&"@test/ui#test".into()));
@@ -849,11 +847,11 @@ mod tests {
 
             // Test specific package task
             let api_build_graph = workspace
-                .build_task_subgraph(&vec!["@test/api#build".into()], Arc::default(), false)
+                .build_task_subgraph(&["@test/api#build".into()], Arc::default(), false)
                 .expect("Failed to resolve api build task");
 
             let api_deps: Vec<_> =
-                api_build_graph.node_weights().map(|task| task.display_name()).collect();
+                api_build_graph.node_weights().map(super::ResolvedTask::display_name).collect();
 
             // Should include api and its dependencies
             assert!(api_deps.contains(&"@test/api#build".into()));
@@ -862,7 +860,7 @@ mod tests {
             // Should not include app or ui
             assert!(!api_deps.contains(&"@test/app#build".into()));
             assert!(!api_deps.contains(&"@test/ui#build".into()));
-        })
+        });
     }
 
     #[test]
@@ -875,12 +873,12 @@ mod tests {
 
             // Test that we can't use recursive with task names containing # (would be interpreted as scope)
             let result = workspace.build_task_subgraph(
-                &vec!["test#integration".into()],
+                &["test#integration".into()],
                 Arc::default(),
                 true,
             );
             assert!(result.is_err(), "Recursive run with # in task name should fail");
-        })
+        });
     }
 
     #[test]
@@ -893,7 +891,7 @@ mod tests {
 
             // Test app build task graph - this should show the full dependency tree
             let app_build_graph = workspace
-                .build_task_subgraph(&vec!["@test/app#build".into()], Arc::default(), false)
+                .build_task_subgraph(&["@test/app#build".into()], Arc::default(), false)
                 .expect("Failed to resolve app build task");
 
             // Expected task graph structure:
@@ -920,7 +918,7 @@ mod tests {
 
             // Verify all tasks are present
             let all_tasks: Vec<_> =
-                app_build_graph.node_weights().map(|task| task.display_name()).collect();
+                app_build_graph.node_weights().map(super::ResolvedTask::display_name).collect();
 
             // App should have 5 subtasks (indices: 0, 1, 2, 3, None)
             assert_eq!(
@@ -1024,7 +1022,7 @@ mod tests {
                 "@test/ui#build(subcommand 0)",
                 "@test/shared#build",
             ));
-        })
+        });
     }
 
     #[test]
@@ -1120,7 +1118,7 @@ mod tests {
                 task_a.resolved_command.fingerprint, task_c_subtask_0.resolved_command.fingerprint,
                 "Task 'a' and first subtask of 'c' should have identical fingerprints for cache sharing"
             );
-        })
+        });
     }
 
     #[test]
@@ -1140,16 +1138,15 @@ mod tests {
 
             // Test resolving build task recursively - should find both packages
             let build_tasks = workspace
-                .build_task_subgraph(&vec!["build".into()], Arc::default(), true)
+                .build_task_subgraph(&["build".into()], Arc::default(), true)
                 .expect("Failed to resolve build tasks recursively");
 
             let task_names: Vec<_> =
-                build_tasks.node_weights().map(|task| task.display_name()).collect();
+                build_tasks.node_weights().map(super::ResolvedTask::display_name).collect();
 
             assert!(
                 task_names.contains(&"build".into()),
-                "Should find empty-name package build task, found: {:?}",
-                task_names
+                "Should find empty-name package build task, found: {task_names:?}"
             );
             assert!(
                 task_names.contains(&"normal-package#build".into()),
@@ -1158,11 +1155,11 @@ mod tests {
 
             // Test that empty-name package internal dependencies work
             let empty_build = workspace
-                .build_task_subgraph(&vec!["#build".into()], Arc::default(), false)
+                .build_task_subgraph(&["#build".into()], Arc::default(), false)
                 .expect("Failed to resolve empty-name build");
 
             let empty_build_tasks: Vec<_> =
-                empty_build.node_weights().map(|task| task.display_name()).collect();
+                empty_build.node_weights().map(super::ResolvedTask::display_name).collect();
 
             assert!(empty_build_tasks.contains(&"build".into()), "Should have build task");
             assert!(
@@ -1185,7 +1182,7 @@ mod tests {
                 has_edge(&empty_build, "build", "test"),
                 "Empty-name build should depend on empty-name test (internal dependency)"
             );
-        })
+        });
     }
 
     #[test]
@@ -1207,19 +1204,18 @@ mod tests {
 
             // Test recursive build includes both nameless packages
             let build_tasks = workspace
-                .build_task_subgraph(&vec!["build".into()], Arc::default(), true)
+                .build_task_subgraph(&["build".into()], Arc::default(), true)
                 .expect("Failed to resolve build tasks recursively");
 
             let task_names: Vec<_> =
-                build_tasks.node_weights().map(|task| task.display_name()).collect();
+                build_tasks.node_weights().map(super::ResolvedTask::display_name).collect();
 
             // Count build tasks from nameless packages (they appear as just "build")
             let nameless_build_count = task_names.iter().filter(|name| *name == "build").count();
 
             assert_eq!(
                 nameless_build_count, 2,
-                "Should find 2 'build' tasks from nameless packages, found tasks: {:?}",
-                task_names
+                "Should find 2 'build' tasks from nameless packages, found tasks: {task_names:?}"
             );
 
             // Verify normal package build is also included
@@ -1231,11 +1227,11 @@ mod tests {
             // Test that nameless packages can have different internal dependencies
             // The second nameless package has more complex dependencies
             let deploy_tasks = workspace
-                .build_task_subgraph(&vec!["deploy".into()], Arc::default(), true)
+                .build_task_subgraph(&["deploy".into()], Arc::default(), true)
                 .expect("Failed to resolve deploy tasks");
 
             let deploy_task_names: Vec<_> =
-                deploy_tasks.node_weights().map(|task| task.display_name()).collect();
+                deploy_tasks.node_weights().map(super::ResolvedTask::display_name).collect();
 
             // Check that deploy task and its dependencies are resolved
             assert!(
@@ -1253,11 +1249,11 @@ mod tests {
 
             // Verify that dependencies between nameless packages don't interfere
             let test_tasks = workspace
-                .build_task_subgraph(&vec!["test".into()], Arc::default(), true)
+                .build_task_subgraph(&["test".into()], Arc::default(), true)
                 .expect("Failed to resolve test tasks");
 
             let test_task_names: Vec<_> =
-                test_tasks.node_weights().map(|task| task.display_name()).collect();
+                test_tasks.node_weights().map(super::ResolvedTask::display_name).collect();
 
             // Should have test tasks from both nameless packages and normal-package
             let nameless_test_count = test_task_names.iter().filter(|name| *name == "test").count();
@@ -1268,7 +1264,7 @@ mod tests {
             // The second nameless package depends on normal-package
             // With topological ordering, build tasks should respect package dependencies
             let build_graph = workspace
-                .build_task_subgraph(&vec!["build".into()], Arc::default(), true)
+                .build_task_subgraph(&["build".into()], Arc::default(), true)
                 .expect("Failed to resolve build with topological");
 
             // Helper to check edges
@@ -1297,7 +1293,7 @@ mod tests {
                     && has_edge(&build_graph, "build", "normal-package#test"),
                 "Should have dependency from normal-package to second nameless package due to topological ordering"
             );
-        })
+        });
     }
 
     #[test]
@@ -1313,7 +1309,7 @@ mod tests {
 
             // First, test that the original scoped task works
             let api_build_scoped = workspace
-                .build_task_subgraph(&vec!["@test/api#build".into()], Arc::default(), false)
+                .build_task_subgraph(&["@test/api#build".into()], Arc::default(), false)
                 .expect("Failed to resolve @test/api#build");
 
             // Find the number of tasks for API build
@@ -1322,7 +1318,7 @@ mod tests {
 
             // Test that we can resolve task with '#' in package
             let app_test_scoped = workspace
-                .build_task_subgraph(&vec!["@test/app#test".into()], Arc::default(), false)
+                .build_task_subgraph(&["@test/app#test".into()], Arc::default(), false)
                 .expect("Failed to resolve @test/app#test");
 
             // Should include dependencies
@@ -1337,7 +1333,7 @@ mod tests {
                 }
             }
             assert!(found_app_test, "Should find @test/app#test task in graph");
-        })
+        });
     }
 
     #[test]
@@ -1361,9 +1357,9 @@ mod tests {
                     Error::AmbiguousTaskRequest { .. } => {
                         // This is the expected error
                     }
-                    _ => panic!("Expected TaskNameConflict error, but got: {:?}", e),
+                    _ => panic!("Expected TaskNameConflict error, but got: {e:?}"),
                 }
             }
-        })
+        });
     }
 }

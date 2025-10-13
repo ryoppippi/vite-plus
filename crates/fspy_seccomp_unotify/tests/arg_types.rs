@@ -83,7 +83,7 @@ async fn run_in_pre_exec(
 
         assert!(exit_status.success());
 
-        let syscalls = recorders.into_iter().map(|recorder| recorder.0.into_iter()).flatten();
+        let syscalls = recorders.into_iter().flat_map(|recorder| recorder.0.into_iter());
         io::Result::Ok(syscalls.collect())
     })
     .await??)

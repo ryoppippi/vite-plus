@@ -141,7 +141,7 @@ mod tests {
 
         let fingerprint2 = CommandFingerprint {
             cwd: RelativePathBuf::default(),
-            command: TaskCommand::Parsed(parsed_cmd.clone()),
+            command: TaskCommand::Parsed(parsed_cmd),
             envs_without_pass_through: [
                 ("ENV_A".into(), "a".into()),
                 ("ENV_B".into(), "b".into()),

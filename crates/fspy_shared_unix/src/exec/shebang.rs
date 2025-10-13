@@ -13,15 +13,11 @@ fn is_whitespace(c: u8) -> bool {
 }
 
 #[derive(Clone, Copy, Debug)]
+#[derive(Default)]
 pub struct ParseShebangOptions {
     pub split_arguments: bool, // TODO: recursive
 }
 
-impl Default for ParseShebangOptions {
-    fn default() -> Self {
-        Self { split_arguments: cfg!(target_vendor = "apple") }
-    }
-}
 
 pub fn parse_shebang(
     mut peek_executable: impl FnMut(&Path, &mut [u8]) -> nix::Result<usize>,

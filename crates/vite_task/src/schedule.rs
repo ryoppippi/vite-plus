@@ -270,7 +270,7 @@ mod tests {
 
             // Test build task graph
             let build_graph = workspace
-                .build_task_subgraph(&vec!["build".into()], Arc::default(), true)
+                .build_task_subgraph(&["build".into()], Arc::default(), true)
                 .expect("Failed to resolve build tasks");
 
             let plan =
@@ -282,6 +282,6 @@ mod tests {
             assert_order(&plan, "@test/ui#build", "@test/app#build(subcommand 0)");
             assert_order(&plan, "@test/api#build", "@test/app#build(subcommand 0)");
             assert_order(&plan, "@test/shared#build", "@test/app#build(subcommand 0)");
-        })
+        });
     }
 }
