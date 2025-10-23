@@ -1,21 +1,19 @@
 #[cfg(windows)]
 use std::ffi::OsString;
-#[cfg(unix)]
-use std::sync::Arc;
 use std::{
     borrow::Cow,
     ffi::OsStr,
     fmt::Debug,
     path::{Path, StripPrefixError},
+    sync::Arc,
 };
 
 use allocator_api2::alloc::Allocator;
+use bincode::{BorrowDecode, Decode, Encode};
 #[cfg(unix)]
-use bincode::Decode;
-use bincode::{BorrowDecode, Encode};
 use bstr::BStr;
 
-/// Similar to `OsStr`, but requires no copy for `encode/borrow_decode`
+/// Similar to `OsStr`, but requires zero-copy to construct from either ansi or wide characters on Windows.
 #[derive(Encode, BorrowDecode, Clone, Copy, PartialEq, Eq)]
 pub struct NativeStr<'a> {
     #[cfg(windows)]
@@ -55,13 +53,16 @@ impl<'a> NativeStr<'a> {
         }
     }
 
+    #[cfg(unix)]
     #[must_use]
     pub const fn from_bytes(bytes: &'a [u8]) -> Self {
-        Self {
-            #[cfg(windows)]
-            is_wide: false,
-            data: bytes,
-        }
+        Self { data: bytes }
+    }
+
+    #[cfg(windows)]
+    #[must_use]
+    pub const fn from_ansi(bytes: &'a [u8]) -> Self {
+        Self { is_wide: false, data: bytes }
     }
 
     #[cfg(windows)]
@@ -151,6 +152,7 @@ fn strip_windows_path_prefix(p: &OsStr) -> &OsStr {
     }
 }
 
+#[cfg(unix)]
 impl<'a> From<&'a BStr> for NativeStr<'a> {
     fn from(value: &'a BStr) -> Self {
         Self::from_bytes(value)
@@ -163,54 +165,60 @@ impl Debug for NativeStr<'_> {
     }
 }
 
-#[cfg(unix)]
+/// Similar to `OsString`, but can be losslessly encoded/decoded using bincode.
+/// `Encode`/`Decoded` implementations for `OsString` requires it to be valid UTF-8. This does not.
 #[derive(Encode, Decode, Clone, Hash)]
 pub struct NativeString {
+    #[cfg(unix)]
     data: Arc<[u8]>,
+    #[cfg(windows)]
+    data: Arc<[u16]>,
 }
 
-#[cfg(unix)]
-impl<'a> Debug for NativeString {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        <OsStr as Debug>::fmt(self.as_os_str(), f)
-    }
-}
-
-#[cfg(unix)]
-impl<'a> From<&'a OsStr> for NativeString {
-    fn from(value: &'a OsStr) -> Self {
-        use std::os::unix::ffi::OsStrExt;
-        Self { data: value.as_bytes().into() }
-    }
-}
-#[cfg(unix)]
-impl<'a> From<String> for NativeString {
-    fn from(value: String) -> Self {
-        Self { data: value.as_bytes().into() }
-    }
-}
-#[cfg(unix)]
-impl<'a> From<&'a std::path::Path> for NativeString {
-    fn from(value: &'a std::path::Path) -> Self {
-        value.as_os_str().into()
-    }
-}
-
-#[cfg(unix)]
-impl std::ops::Deref for NativeString {
-    type Target = OsStr;
-
-    fn deref(&self) -> &Self::Target {
-        self.as_os_str()
-    }
-}
-
-#[cfg(unix)]
 impl NativeString {
-    #[must_use]
+    #[cfg(unix)]
     pub fn as_os_str(&self) -> &OsStr {
         use std::os::unix::ffi::OsStrExt as _;
         OsStr::from_bytes(&self.data)
+    }
+
+    #[cfg(windows)]
+    pub fn to_os_string(&self) -> OsString {
+        use std::os::windows::ffi::OsStringExt as _;
+        OsString::from_wide(&self.data)
+    }
+
+    pub fn to_cow_os_str(&self) -> Cow<'_, OsStr> {
+        #[cfg(unix)]
+        return Cow::Borrowed(self.as_os_str());
+        #[cfg(windows)]
+        return Cow::Owned(self.to_os_string());
+    }
+}
+
+impl<'a> Debug for NativeString {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        <OsStr as Debug>::fmt(&self.to_cow_os_str(), f)
+    }
+}
+
+impl<'a> From<&'a OsStr> for NativeString {
+    #[cfg(unix)]
+    fn from(value: &'a OsStr) -> Self {
+        use std::os::unix::ffi::OsStrExt as _;
+        Self { data: value.as_bytes().into() }
+    }
+
+    #[cfg(windows)]
+    fn from(value: &'a OsStr) -> Self {
+        use std::os::windows::ffi::OsStrExt as _;
+        Self { data: value.encode_wide().collect() }
+    }
+}
+
+impl<'a> From<&'a std::path::Path> for NativeString {
+    fn from(value: &'a std::path::Path) -> Self {
+        value.as_os_str().into()
     }
 }
 
@@ -221,11 +229,11 @@ mod tests {
 
     #[cfg(windows)]
     #[test]
-    fn test_from_asni() {
-        let asni_str = "hello";
-        let native_str = NativeStr::from_bytes(asni_str.as_bytes());
+    fn test_from_ansi() {
+        let ansi_str = "hello";
+        let native_str = NativeStr::from_ansi(ansi_str.as_bytes());
         let os_string = native_str.to_os_string();
-        assert_eq!(os_string.to_str().unwrap(), asni_str);
+        assert_eq!(os_string.to_str().unwrap(), ansi_str);
     }
 
     #[cfg(windows)]

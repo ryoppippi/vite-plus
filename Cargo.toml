@@ -73,6 +73,7 @@ fspy_preload_windows = { path = "crates/fspy_preload_windows", artifact = "cdyli
 fspy_seccomp_unotify = { path = "crates/fspy_seccomp_unotify" }
 fspy_shared = { path = "crates/fspy_shared" }
 fspy_shared_unix = { path = "crates/fspy_shared_unix" }
+fspy_test_utils = { path = "crates/fspy_test_utils" }
 futures = "0.3.31"
 futures-core = "0.3.31"
 futures-util = "0.3.31"
@@ -109,6 +110,7 @@ serde_yml = "0.0.12"
 serial_test = "3.2.0"
 sha1 = "0.10.6"
 sha2 = "0.10.9"
+shared_memory = "0.12.4"
 shell-escape = "0.1.5"
 slab = "0.4.9"
 smallvec = { version = "2.0.0-alpha.11", features = ["std"] }
