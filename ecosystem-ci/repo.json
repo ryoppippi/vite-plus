@@ -49,5 +49,10 @@
     "repository": "https://github.com/itaymendel/oxlint-plugin-complexity.git",
     "branch": "main",
     "hash": "0db2fd94497ca21952ba0a000a8ce81fd4854e36"
+  },
+  "waku": {
+    "repository": "https://github.com/wakujs/waku.git",
+    "branch": "main",
+    "hash": "5bd959fa785eb1834c33b3e253c9dfaaa1bf6a06"
   }
 }
