@@ -236,6 +236,18 @@ jobs:
               vite run type-check:tsgo
               vite run build
               vite run test navigation-utils.test.ts real-browser-flicker.test.tsx workflow-parallel-limit.test.tsx
+          - name: fastify-vite
+            node-version: 24
+            command: |
+              vite run format
+              vite run format:check
+              vite run lint
+              vite run test:examples
+              # nested commands are not supported yet
+              # https://github.com/voidzero-dev/vite-task/issues/131
+              # use vite run @fastify/vite#test instead
+              # vite run test
+              vite run @fastify/vite#test
         exclude:
           # frm-stack uses Docker (testcontainers) which doesn't work the same way on Windows
           - os: windows-latest
@@ -245,6 +257,10 @@ jobs:
           - os: windows-latest
             project:
               name: dify
+          # fastify-vite only runs on Linux
+          - os: windows-latest
+            project:
+              name: fastify-vite
 
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1

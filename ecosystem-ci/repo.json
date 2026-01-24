@@ -49,5 +49,10 @@
     "repository": "https://github.com/itaymendel/oxlint-plugin-complexity.git",
     "branch": "main",
     "hash": "0db2fd94497ca21952ba0a000a8ce81fd4854e36"
+  },
+  "fastify-vite": {
+    "repository": "https://github.com/fastify/fastify-vite.git",
+    "branch": "main",
+    "hash": "920d222456327c2b7cee8f2a02a20eed603d32cf"
   }
 }
