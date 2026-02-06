@@ -108,6 +108,8 @@ export function replaceUnstableOutput(output: string, cwd?: string) {
       .replaceAll(/"integrity": "(\w+)-.+?"/g, '"integrity": "$1-<hash>"')
       // replace homedir; e.g.: /Users/foo/Library/pnpm/global/5/node_modules/testnpm2 => <homedir>/Library/pnpm/global/5/node_modules/testnpm2
       .replaceAll(homedir(), '<homedir>')
+      // normalize both .vite-plus-dev (local dev) and .vite-plus (CI) to a stable placeholder
+      .replaceAll(/<homedir>\/\.vite-plus(-dev)?/g, '<vite-plus-home>')
       // replace npm log file path with timestamp
       // e.g.: <homedir>/.npm/_logs/<date>T07_38_18_387Z-debug-0.log => <homedir>/.npm/_logs/<timestamp>-debug.log
       .replaceAll(
