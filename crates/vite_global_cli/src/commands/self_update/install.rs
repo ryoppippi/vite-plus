@@ -18,7 +18,12 @@ use crate::error::Error;
 ///
 /// Returns `false` if the path contains `..` components or is absolute.
 fn is_safe_tar_path(path: &Path) -> bool {
-    !path.is_absolute() && !path.components().any(|c| matches!(c, std::path::Component::ParentDir))
+    // Also check for Unix-style absolute paths, since tar archives always use forward
+    // slashes and `Path::is_absolute()` on Windows only recognizes `C:\...` style paths.
+    let starts_with_slash = path.to_string_lossy().starts_with('/');
+    !path.is_absolute()
+        && !starts_with_slash
+        && !path.components().any(|c| matches!(c, std::path::Component::ParentDir))
 }
 
 /// Files/directories to extract from the main package tarball.
