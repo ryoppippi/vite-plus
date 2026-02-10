@@ -2,8 +2,26 @@ import { defineConfig } from 'vite-plus';
 
 export default defineConfig({
   lint: {
+    plugins: ['unicorn', 'typescript', 'oxc'],
+    categories: {
+      correctness: 'error',
+      perf: 'error',
+      suspicious: 'error',
+    },
     rules: {
+      'eslint-plugin-unicorn/prefer-array-find': 'off',
+      'eslint/no-await-in-loop': 'off',
+      'eslint/no-new': 'off',
       'no-console': ['error', { allow: ['error'] }],
+      'oxc/no-accumulating-spread': 'off',
+      'oxc/no-async-endpoint-handlers': 'off',
+      'oxc/no-map-spread': 'off',
+      'typescript/no-explicit-any': 'error',
+      'typescript/no-extraneous-class': 'off',
+      'typescript/no-unsafe-type-assertion': 'off',
+      'unicorn/consistent-function-scoping': 'off',
+      'unicorn/require-post-message-target-origin': 'off',
+      curly: 'error',
     },
     overrides: [
       {
