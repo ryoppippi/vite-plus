@@ -38,6 +38,12 @@ export default defineConfig({
           'no-console': 'off',
         },
       },
+      {
+        files: ['packages/cli/src/oxlint-config.ts'],
+        rules: {
+          'typescript/no-explicit-any': 'off',
+        },
+      },
     ],
     ignorePatterns: ['**/snap-tests/**', '**/snap-tests-todo/**'],
   },

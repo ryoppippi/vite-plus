@@ -15,17 +15,17 @@ interface PnpmWorkspace {
   peerDependencyRules?: {
     allowedVersions?: Record<string, string>;
   };
-  packageExtensions?: Record<string, any>;
+  packageExtensions?: Record<string, unknown>;
   overrides?: Record<string, string>;
   ignoreScripts?: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface PackageJson {
   name?: string;
   version?: string;
-  exports?: Record<string, any>;
-  [key: string]: any;
+  exports?: Record<string, unknown>;
+  [key: string]: unknown;
 }
 
 type ExportValue = string | { [condition: string]: string | ExportValue } | null;
@@ -50,8 +50,11 @@ function execCommand(command: string, cwd?: string): string {
       encoding: 'utf-8',
       stdio: 'pipe',
     }).trim();
-  } catch (err: any) {
-    throw new Error(`Failed to execute: ${command}\n${err.message}`, { cause: err });
+  } catch (error) {
+    throw new Error(
+      `Failed to execute: ${command}\n${error instanceof Error ? error.message : error}`,
+      { cause: error },
+    );
   }
 }
 
@@ -112,8 +115,10 @@ function cloneOrResetRepo(repoUrl: string, dir: string, branch: string = 'main',
           log(`${dir} reset to latest ${branch}`);
         }
       }
-    } catch (err: any) {
-      log(`Failed to reset ${dir} (${err.message}), removing and re-cloning...`);
+    } catch (error) {
+      log(
+        `Failed to reset ${dir} (${error instanceof Error ? error.message : error}), removing and re-cloning...`,
+      );
       rmSync(dir, { recursive: true, force: true });
       cloneRepo(repoUrl, dir, branch, hash);
     }
@@ -134,10 +139,7 @@ function cloneRepo(repoUrl: string, dir: string, branch: string, hash?: string) 
   }
 }
 
-function transformRolldownExport(
-  exportPath: string,
-  exportValue: ExportValue,
-): [string, ExportValue] {
+function transformRolldownExport(exportPath: string, exportValue: unknown): [string, ExportValue] {
   // Skip package.json
   if (exportPath === './package.json') {
     return ['', null];
@@ -147,7 +149,7 @@ function transformRolldownExport(
   const newExportPath = exportPath === '.' ? './rolldown' : `./rolldown${exportPath.slice(1)}`;
 
   // Transform export value
-  const transformValue = (value: ExportValue): ExportValue => {
+  const transformValue = (value: unknown): ExportValue => {
     if (typeof value === 'string') {
       // Skip 'dev' condition paths that point to src
       if (value.startsWith('./src/')) {
@@ -158,7 +160,7 @@ function transformRolldownExport(
     }
 
     if (value && typeof value === 'object') {
-      const result: Record<string, any> = {};
+      const result: Record<string, unknown> = {};
       for (const [key, val] of Object.entries(value)) {
         // Skip 'dev' condition
         if (key === 'dev') {
@@ -170,10 +172,10 @@ function transformRolldownExport(
           result[key] = transformed;
         }
       }
-      return Object.keys(result).length > 0 ? result : null;
+      return Object.keys(result).length > 0 ? (result as ExportValue) : null;
     }
 
-    return value;
+    return value as ExportValue;
   };
 
   const newValue = transformValue(exportValue);
@@ -219,7 +221,7 @@ function transformRolldownExport(
 
 function transformPluginutilsExport(
   exportPath: string,
-  exportValue: ExportValue,
+  exportValue: unknown,
 ): [string, ExportValue] {
   // Skip package.json
   if (exportPath === './package.json') {
@@ -231,7 +233,7 @@ function transformPluginutilsExport(
     exportPath === '.' ? './rolldown/pluginutils' : `./rolldown/pluginutils${exportPath.slice(1)}`;
 
   // Transform paths
-  const transformValue = (value: ExportValue): ExportValue => {
+  const transformValue = (value: unknown): ExportValue => {
     if (typeof value === 'string') {
       if (value.startsWith('./src/')) {
         return null;
@@ -240,7 +242,7 @@ function transformPluginutilsExport(
     }
 
     if (value && typeof value === 'object') {
-      const result: Record<string, any> = {};
+      const result: Record<string, unknown> = {};
       for (const [key, val] of Object.entries(value)) {
         if (key === 'dev') {
           continue;
@@ -250,10 +252,10 @@ function transformPluginutilsExport(
           result[key] = transformed;
         }
       }
-      return Object.keys(result).length > 0 ? result : null;
+      return Object.keys(result).length > 0 ? (result as ExportValue) : null;
     }
 
-    return value;
+    return value as ExportValue;
   };
 
   const newValue = transformValue(exportValue);
@@ -287,7 +289,7 @@ function transformPluginutilsExport(
   return [newExportPath, newValue];
 }
 
-function transformViteExport(exportPath: string, exportValue: ExportValue): [string, ExportValue] {
+function transformViteExport(exportPath: string, exportValue: unknown): [string, ExportValue] {
   // Skip package.json
   if (exportPath === './package.json') {
     return ['', null];
@@ -297,7 +299,7 @@ function transformViteExport(exportPath: string, exportValue: ExportValue): [str
   const newExportPath = exportPath;
 
   // Transform paths in values
-  const transformValue = (value: ExportValue): ExportValue => {
+  const transformValue = (value: unknown): ExportValue => {
     if (typeof value === 'string') {
       // Transform types paths
       if (value.startsWith('./types/')) {
@@ -310,17 +312,17 @@ function transformViteExport(exportPath: string, exportValue: ExportValue): [str
     }
 
     if (value && typeof value === 'object') {
-      const result: Record<string, any> = {};
+      const result: Record<string, unknown> = {};
       for (const [key, val] of Object.entries(value)) {
         const transformed = transformValue(val);
         if (transformed !== null) {
           result[key] = transformed;
         }
       }
-      return Object.keys(result).length > 0 ? result : null;
+      return Object.keys(result).length > 0 ? (result as ExportValue) : null;
     }
 
-    return value;
+    return value as ExportValue;
   };
 
   const newValue = transformValue(exportValue);
@@ -344,8 +346,8 @@ function mergePackageExports(
   rolldownPkg: PackageJson,
   rolldownVitePkg: PackageJson,
   pluginutilsPkg: PackageJson,
-): Record<string, any> {
-  const result: Record<string, any> = {};
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
 
   if (corePkg.exports) {
     for (const [path, value] of Object.entries(corePkg.exports)) {
@@ -391,7 +393,7 @@ function mergePackageExports(
         sorted[key] = result[key];
         return sorted;
       },
-      {} as Record<string, any>,
+      {} as Record<string, unknown>,
     );
 }
 

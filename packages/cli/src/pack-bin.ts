@@ -112,8 +112,8 @@ export async function runCLI(): Promise<void> {
 
   try {
     await cli.runMatchedCommand();
-  } catch (error: any) {
-    globalLogger.error(String(error.stack || error.message));
+  } catch (error) {
+    globalLogger.error(error instanceof Error ? error.stack || error.message : error);
     process.exit(1);
   }
 }

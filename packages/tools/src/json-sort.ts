@@ -23,7 +23,7 @@ export function jsonSort() {
   assert(Array.isArray(data), 'json data must be an array');
   // sort json by script
   const func = new Function('_', `return ${script};`);
-  const sortedJson = data.toSorted((a: any, b: any) => {
+  const sortedJson = data.toSorted((a: unknown, b: unknown) => {
     const aValue = func(a);
     const bValue = func(b);
     if (aValue < bValue) {

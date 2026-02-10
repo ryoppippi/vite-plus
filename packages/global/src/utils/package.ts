@@ -43,7 +43,7 @@ export function detectPackageMetadata(
  * @param currentDir - The current directory to start searching from.
  * @returns The package.json content as a JSON object, or null if no package.json is found.
  */
-export function readNearestPackageJson<T = Record<string, any>>(currentDir: string): T | null {
+export function readNearestPackageJson<T = Record<string, unknown>>(currentDir: string): T | null {
   do {
     const packageJsonPath = path.join(currentDir, 'package.json');
     if (fs.existsSync(packageJsonPath)) {

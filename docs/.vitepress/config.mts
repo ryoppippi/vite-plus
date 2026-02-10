@@ -718,7 +718,7 @@ export default extendConfig(
         provider: 'local',
       },
     },
-    transformHead({ page, pageData, assets }) {
+    transformHead({ page, pageData }) {
       // Remove .md suffix and replace index with empty string (to cover index.md)
       const url = 'https://viteplus.dev/' + page.replace(/\.md$/, '').replace(/index$/, '');
 

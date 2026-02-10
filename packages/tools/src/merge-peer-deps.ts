@@ -7,7 +7,7 @@ interface PackageJson {
   name?: string;
   peerDependencies?: Record<string, string>;
   peerDependenciesMeta?: Record<string, { optional?: boolean }>;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 function log(message: string) {
