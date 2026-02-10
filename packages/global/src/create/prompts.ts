@@ -20,10 +20,14 @@ export async function promptPackageNameAndTargetDir(
       placeholder: defaultPackageName,
       defaultValue: defaultPackageName,
       validate: (value) => {
-        if (value.length === 0) return;
+        if (value.length === 0) {
+          return;
+        }
 
         const result = validateNpmPackageName(value);
-        if (result.validForNewPackages) return;
+        if (result.validForNewPackages) {
+          return;
+        }
         return result.errors?.[0] ?? result.warnings?.[0] ?? 'Invalid package name';
       },
     });

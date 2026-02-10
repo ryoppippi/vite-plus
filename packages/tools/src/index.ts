@@ -34,4 +34,3 @@ switch (subcommand) {
 }
 
 // Can't use top-level await if the file is not a module
-export {};

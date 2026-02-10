@@ -83,7 +83,7 @@ export async function detectWorkspace(rootDir: string): Promise<WorkspaceInfoOpt
         dirs.add(dir);
       }
     }
-    result.parentDirs = Array.from(dirs).sort();
+    result.parentDirs = Array.from(dirs).toSorted();
 
     // Extract the scope from the package.json
     const pkg = readJsonFile<{ name?: string }>(packageJsonFile);

@@ -21,7 +21,9 @@ const scrollToSection = (e: Event, id: string) => {
   e.stopPropagation();
 
   const element = document.getElementById(id);
-  if (!element) return;
+  if (!element) {
+    return;
+  }
 
   // Get the toolbar height to offset the scroll
   const toolbar = (e.currentTarget as HTMLElement).closest('section');
@@ -38,7 +40,9 @@ const scrollToSection = (e: Event, id: string) => {
   let startTime: number | null = null;
 
   const animation = (currentTime: number) => {
-    if (startTime === null) startTime = currentTime;
+    if (startTime === null) {
+      startTime = currentTime;
+    }
     const timeElapsed = currentTime - startTime;
     const progress = Math.min(timeElapsed / duration, 1);
 
@@ -89,7 +93,9 @@ const determineActiveSection = () => {
   const sections = features
     .map((feature) => {
       const element = document.getElementById(feature.id);
-      if (!element) return null;
+      if (!element) {
+        return null;
+      }
 
       const rect = element.getBoundingClientRect();
       return {
@@ -107,7 +113,9 @@ const determineActiveSection = () => {
   let activeId = activeSection.value;
 
   for (const section of sections) {
-    if (!section) continue;
+    if (!section) {
+      continue;
+    }
 
     // If section top is near or above threshold and bottom is below threshold
     if (section.top <= threshold && section.bottom > threshold) {

@@ -51,7 +51,7 @@ function execCommand(command: string, cwd?: string): string {
       stdio: 'pipe',
     }).trim();
   } catch (err: any) {
-    throw new Error(`Failed to execute: ${command}\n${err.message}`);
+    throw new Error(`Failed to execute: ${command}\n${err.message}`, { cause: err });
   }
 }
 
@@ -161,7 +161,9 @@ function transformRolldownExport(
       const result: Record<string, any> = {};
       for (const [key, val] of Object.entries(value)) {
         // Skip 'dev' condition
-        if (key === 'dev') continue;
+        if (key === 'dev') {
+          continue;
+        }
 
         const transformed = transformValue(val);
         if (transformed !== null) {
@@ -240,7 +242,9 @@ function transformPluginutilsExport(
     if (value && typeof value === 'object') {
       const result: Record<string, any> = {};
       for (const [key, val] of Object.entries(value)) {
-        if (key === 'dev') continue;
+        if (key === 'dev') {
+          continue;
+        }
         const transformed = transformValue(val);
         if (transformed !== null) {
           result[key] = transformed;
@@ -381,7 +385,7 @@ function mergePackageExports(
 
   // Sort exports by key
   return Object.keys(result)
-    .sort()
+    .toSorted()
     .reduce(
       (sorted, key) => {
         sorted[key] = result[key];
@@ -414,7 +418,9 @@ const VITEST_DEPS = new Set(['tinybench']);
 
 // These packages should always use the highest version
 function syncedPackages(packageName: string): boolean {
-  if (OXC_PACKAGES.has(packageName) || VITEST_DEPS.has(packageName)) return true;
+  if (OXC_PACKAGES.has(packageName) || VITEST_DEPS.has(packageName)) {
+    return true;
+  }
   return OXC_PACKAGE_PREFIXES.some((prefix) => packageName.startsWith(prefix));
 }
 
@@ -425,7 +431,9 @@ function mergeSemverVersions(
   semver: typeof import('semver'),
 ): string {
   // Handle special cases
-  if (v1 === v2) return v1;
+  if (v1 === v2) {
+    return v1;
+  }
 
   // Handle exact version specifiers (=)
   const isExact1 = v1.startsWith('=');
@@ -450,8 +458,12 @@ function mergeSemverVersions(
   // Handle npm: prefix
   if (v1.startsWith('npm:') || v2.startsWith('npm:')) {
     // If one has npm: prefix, prefer the non-npm version or return the first one
-    if (!v1.startsWith('npm:')) return v1;
-    if (!v2.startsWith('npm:')) return v2;
+    if (!v1.startsWith('npm:')) {
+      return v1;
+    }
+    if (!v2.startsWith('npm:')) {
+      return v2;
+    }
     return v1;
   }
 
@@ -552,7 +564,7 @@ function mergePnpmWorkspaces(
 
   // Sort catalog keys alphabetically
   result.catalog = Object.keys(catalog)
-    .sort()
+    .toSorted()
     .reduce(
       (sorted, key) => {
         sorted[key] = catalog[key];

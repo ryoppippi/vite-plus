@@ -118,7 +118,9 @@ export async function snapTest() {
 
   const taskFunctions: (() => Promise<void>)[] = [];
   for (const caseName of fs.readdirSync(casesDir)) {
-    if (caseName.startsWith('.')) continue; // Skip hidden files like .DS_Store
+    if (caseName.startsWith('.')) {
+      continue;
+    } // Skip hidden files like .DS_Store
     if (caseName.includes(filter)) {
       taskFunctions.push(() => runTestCase(caseName, tempTmpDir, casesDir));
     }

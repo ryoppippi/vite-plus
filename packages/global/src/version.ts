@@ -73,7 +73,9 @@ function resolveToolVersion(tool: ToolVersionSpec, localPackagePath: string): st
     return bundledVersion;
   }
   const version = pkg?.version ?? null;
-  if (version) return version;
+  if (version) {
+    return version;
+  }
   if (tool.fallbackPackageJson) {
     const fallbackPath = path.join(localPackagePath, tool.fallbackPackageJson);
     return readPackageVersionFromPath(fallbackPath);

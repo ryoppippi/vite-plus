@@ -58,8 +58,12 @@ function getQuoteChar(node: SgNode): string {
  * Matches exact, subpath (from/...), or file extension (from.xxx)
  */
 function matchesFrom(specifier: string, from: string): boolean {
-  if (specifier === from) return true;
-  if (!specifier.startsWith(from)) return false;
+  if (specifier === from) {
+    return true;
+  }
+  if (!specifier.startsWith(from)) {
+    return false;
+  }
   // Check the character after the prefix - must be '/', '.', or end of string
   const nextChar = specifier[from.length];
   return nextChar === '/' || nextChar === '.';

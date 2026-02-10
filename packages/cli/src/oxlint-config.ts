@@ -572,7 +572,9 @@ function jsToJSONProps(typ: any): any {
 
 function transform(val: any, typ: any, getProps: any, key: any = '', parent: any = ''): any {
   function transformPrimitive(typ: string, val: any): any {
-    if (typeof typ === typeof val) return val;
+    if (typeof typ === typeof val) {
+      return val;
+    }
     return invalidValue(typ, val, key, parent);
   }
 
@@ -589,7 +591,9 @@ function transform(val: any, typ: any, getProps: any, key: any = '', parent: any
   }
 
   function transformEnum(cases: string[], val: any): any {
-    if (cases.indexOf(val) !== -1) return val;
+    if (cases.indexOf(val) !== -1) {
+      return val;
+    }
     return invalidValue(
       cases.map((a) => {
         return l(a);
@@ -602,7 +606,9 @@ function transform(val: any, typ: any, getProps: any, key: any = '', parent: any
 
   function transformArray(typ: any, val: any): any {
     // val must be an array with no invalid elements
-    if (!Array.isArray(val)) return invalidValue(l('array'), val, key, parent);
+    if (!Array.isArray(val)) {
+      return invalidValue(l('array'), val, key, parent);
+    }
     return val.map((el) => transform(el, typ, getProps));
   }
 
@@ -635,18 +641,26 @@ function transform(val: any, typ: any, getProps: any, key: any = '', parent: any
     return result;
   }
 
-  if (typ === 'any') return val;
+  if (typ === 'any') {
+    return val;
+  }
   if (typ === null) {
-    if (val === null) return val;
+    if (val === null) {
+      return val;
+    }
     return invalidValue(typ, val, key, parent);
   }
-  if (typ === false) return invalidValue(typ, val, key, parent);
+  if (typ === false) {
+    return invalidValue(typ, val, key, parent);
+  }
   let ref: any = undefined;
   while (typeof typ === 'object' && typ.ref !== undefined) {
     ref = typ.ref;
     typ = typeMap[typ.ref];
   }
-  if (Array.isArray(typ)) return transformEnum(typ, val);
+  if (Array.isArray(typ)) {
+    return transformEnum(typ, val);
+  }
   if (typeof typ === 'object') {
     return typ.hasOwnProperty('unionMembers')
       ? transformUnion(typ.unionMembers, val)
@@ -657,7 +671,9 @@ function transform(val: any, typ: any, getProps: any, key: any = '', parent: any
           : invalidValue(typ, val, key, parent);
   }
   // Numbers can be parsed by Date but shouldn't be.
-  if (typ === Date && typeof val !== 'number') return transformDate(val);
+  if (typ === Date && typeof val !== 'number') {
+    return transformDate(val);
+  }
   return transformPrimitive(typ, val);
 }
 

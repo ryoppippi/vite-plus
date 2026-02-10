@@ -75,7 +75,9 @@ cli
   .option('-F, --filter <pattern>', 'Filter configs (cwd or name), e.g. /pkg-name$/ or pkg-name')
   .option('--exports', 'Generate export-related metadata for package.json (experimental)')
   .action(async (input: string[], flags: InlineConfig) => {
-    if (input.length > 0) flags.entry = input;
+    if (input.length > 0) {
+      flags.entry = input;
+    }
     if (flags.envPrefix === undefined) {
       flags.envPrefix = DEFAULT_ENV_PREFIXES;
     }
@@ -84,7 +86,9 @@ cli
       const viteConfig = await resolveConfig({ root: process.cwd() }, 'build');
 
       const configFiles: string[] = [];
-      if (viteConfig.configFile) configFiles.push(viteConfig.configFile);
+      if (viteConfig.configFile) {
+        configFiles.push(viteConfig.configFile);
+      }
 
       const configs: ResolvedConfig[] = [];
       const packConfigs = Array.isArray(viteConfig.pack)

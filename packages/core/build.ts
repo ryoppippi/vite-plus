@@ -339,7 +339,9 @@ async function bundleVitepress() {
 
   for (const file of vitepressDistFiles) {
     const stats = await stat(file);
-    if (!stats.isFile()) continue;
+    if (!stats.isFile()) {
+      continue;
+    }
 
     // Normalize paths to use forward slashes for consistent replacement on Windows
     const relativePath = toPosixPath(file).replace(
@@ -392,7 +394,9 @@ async function bundleVitepress() {
 
   for (const file of vitepressTypesFiles) {
     const stats = await stat(file);
-    if (!stats.isFile()) continue;
+    if (!stats.isFile()) {
+      continue;
+    }
 
     // Normalize paths to use forward slashes for consistent replacement on Windows
     const relativePath = toPosixPath(file).replace(toPosixPath(vitepressTypesDir), '');

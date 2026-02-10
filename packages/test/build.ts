@@ -368,9 +368,13 @@ async function mergePackageJson(pluginExports: Array<{ exportPath: string; shimF
     destPkg.devDependencies = destPkg.devDependencies || {};
     for (const [dep, version] of Object.entries(vitestPkg.dependencies)) {
       // Skip vite - we use our own core package
-      if (dep === 'vite') continue;
+      if (dep === 'vite') {
+        continue;
+      }
       // Skip packages already in dependencies (they're runtime deps, not dev-only)
-      if (destPkg.dependencies && destPkg.dependencies[dep]) continue;
+      if (destPkg.dependencies && destPkg.dependencies[dep]) {
+        continue;
+      }
       // Don't override existing devDependencies
       if (!destPkg.devDependencies[dep]) {
         destPkg.devDependencies[dep] = version;
@@ -410,7 +414,9 @@ async function bundleVitest() {
 
   for await (const file of vitestFiles) {
     const stats = await stat(file);
-    if (!stats.isFile()) continue;
+    if (!stats.isFile()) {
+      continue;
+    }
 
     const relativePath = file.replace(vitestSourceDir, '');
     const destPath = join(vitestDestDir, relativePath);
@@ -876,15 +882,21 @@ async function rewriteVitestImports(leafDepToVendorPath: Map<string, string>) {
 
   for await (const file of mainJsFiles) {
     const rewritten = await rewriteDistFile(file, leafDepToVendorPath);
-    if (rewritten) mainRewrittenCount++;
+    if (rewritten) {
+      mainRewrittenCount++;
+    }
   }
   for await (const file of chunksJsFiles) {
     const rewritten = await rewriteDistFile(file, leafDepToVendorPath);
-    if (rewritten) mainRewrittenCount++;
+    if (rewritten) {
+      mainRewrittenCount++;
+    }
   }
   for await (const file of workersJsFiles) {
     const rewritten = await rewriteDistFile(file, leafDepToVendorPath);
-    if (rewritten) mainRewrittenCount++;
+    if (rewritten) {
+      mainRewrittenCount++;
+    }
   }
 
   console.log(`  Rewrote imports in ${mainRewrittenCount} dist files`);
@@ -986,7 +998,9 @@ function rewriteImportsWithAst(
   // Helper to get relative path for a specifier
   const getRelativePath = (specifier: string): string | null => {
     const vendorPath = specifierToVendorPath.get(specifier);
-    if (!vendorPath) return null;
+    if (!vendorPath) {
+      return null;
+    }
     let relativePath = relative(dirname(filePath), vendorPath);
     // Normalize to forward slashes for ES module imports (Windows uses backslashes)
     relativePath = relativePath.split('\\').join('/');
@@ -1063,7 +1077,7 @@ function rewriteImportsWithAst(
   }
 
   // Sort replacements in reverse order (end to start) to preserve positions
-  const replacements = [...replacementMap.values()].sort((a, b) => b[0] - a[0]);
+  const replacements = [...replacementMap.values()].toSorted((a, b) => b[0] - a[0]);
 
   // Apply replacements
   let result_content = content;
@@ -1756,7 +1770,9 @@ async function copyBrowserClientFiles() {
 
     // Rewrite @vitest/* imports to use our copied @vitest files
     for (const [pkg, distPath] of Object.entries(VITEST_PACKAGE_TO_PATH)) {
-      if (!pkg.startsWith('@vitest/')) continue;
+      if (!pkg.startsWith('@vitest/')) {
+        continue;
+      }
       // Pattern: from"@vitest/runner" or from "@vitest/runner"
       const importPattern = new RegExp(`from\\s*["']${pkg.replace('/', '\\/')}["']`, 'g');
       content = content.replace(importPattern, `from"${relativeToDist}/${distPath}"`);
@@ -2151,20 +2167,32 @@ async function validateExternalDeps() {
     // Filter and record external specifiers
     for (const specifier of specifiers) {
       // Skip relative paths
-      if (specifier.startsWith('.') || specifier.startsWith('/')) continue;
+      if (specifier.startsWith('.') || specifier.startsWith('/')) {
+        continue;
+      }
       // Skip node built-ins
-      if (NODE_BUILTINS.has(specifier)) continue;
+      if (NODE_BUILTINS.has(specifier)) {
+        continue;
+      }
       // Skip Node.js subpath imports
-      if (specifier.startsWith('#')) continue;
+      if (specifier.startsWith('#')) {
+        continue;
+      }
 
       // Get the package name (handle scoped packages and subpaths)
       const packageName = getPackageName(specifier);
-      if (!packageName) continue;
+      if (!packageName) {
+        continue;
+      }
 
       // Check if it's declared
-      if (declaredDeps.has(packageName)) continue;
+      if (declaredDeps.has(packageName)) {
+        continue;
+      }
       // Check if it's in the blocklist (intentionally external)
-      if (EXTERNAL_BLOCKLIST.has(packageName) || EXTERNAL_BLOCKLIST.has(specifier)) continue;
+      if (EXTERNAL_BLOCKLIST.has(packageName) || EXTERNAL_BLOCKLIST.has(specifier)) {
+        continue;
+      }
 
       // Record undeclared external
       if (!externalSpecifiers.has(specifier)) {
@@ -2190,7 +2218,7 @@ async function validateExternalDeps() {
   }
 
   console.log(`\n  ⚠ Found ${byPackage.size} undeclared external dependencies:\n`);
-  for (const [packageName, specifiers] of [...byPackage.entries()].sort()) {
+  for (const [packageName, specifiers] of [...byPackage.entries()].toSorted()) {
     const files = externalSpecifiers.get([...specifiers][0])!;
     console.log(`    ${packageName}`);
     for (const specifier of specifiers) {

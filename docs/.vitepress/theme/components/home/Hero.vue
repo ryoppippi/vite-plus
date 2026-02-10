@@ -49,7 +49,9 @@ const smoothScrollTo = (e: Event, targetId: string) => {
   e.stopPropagation();
 
   const element = document.getElementById(targetId);
-  if (!element) return;
+  if (!element) {
+    return;
+  }
 
   const elementPosition = element.getBoundingClientRect().top + window.scrollY;
   const offsetPosition = elementPosition;
@@ -61,7 +63,9 @@ const smoothScrollTo = (e: Event, targetId: string) => {
   let startTime: number | null = null;
 
   const animation = (currentTime: number) => {
-    if (startTime === null) startTime = currentTime;
+    if (startTime === null) {
+      startTime = currentTime;
+    }
     const timeElapsed = currentTime - startTime;
     const progress = Math.min(timeElapsed / duration, 1);
 

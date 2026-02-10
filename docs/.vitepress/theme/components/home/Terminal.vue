@@ -32,7 +32,9 @@ const goToNextTab = () => {
 
 // Handle animation completion
 const onAnimationComplete = () => {
-  if (!autoPlayEnabled.value) return;
+  if (!autoPlayEnabled.value) {
+    return;
+  }
 
   // Clear any existing timeout
   if (autoAdvanceTimeout) {
@@ -59,7 +61,9 @@ const onTabChange = () => {
 
 // Setup Intersection Observer
 onMounted(() => {
-  if (!sectionRef.value) return;
+  if (!sectionRef.value) {
+    return;
+  }
 
   observer = new IntersectionObserver(
     (entries) => {

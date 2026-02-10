@@ -237,7 +237,9 @@ async function syncCorePackageExports() {
     const srcPath = join(coreClientDir, file);
     const shimPath = join(clientDir, file);
     // Skip directories
-    if (statSync(srcPath).isDirectory()) continue;
+    if (statSync(srcPath).isDirectory()) {
+      continue;
+    }
     if (file.endsWith('.js') || file.endsWith('.mjs') || file.endsWith('.cjs')) {
       await writeFile(shimPath, `export * from '${CORE_PACKAGE_NAME}/dist/client/${file}';\n`);
     } else if (file.endsWith('.d.ts') || file.endsWith('.d.mts') || file.endsWith('.d.cts')) {
@@ -288,7 +290,9 @@ async function syncTypesDir(srcDir: string, destDir: string, relativePath: strin
 
     if (statSync(srcPath).isDirectory()) {
       // Skip top-level internal directory - it's blocked by ./types/internal/* export
-      if (entry === 'internal' && relativePath === '') continue;
+      if (entry === 'internal' && relativePath === '') {
+        continue;
+      }
 
       await mkdir(destPath, { recursive: true });
       await syncTypesDir(srcPath, destPath, entryRelPath);
