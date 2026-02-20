@@ -28,7 +28,7 @@ fn is_safe_tar_path(path: &Path) -> bool {
 
 /// Files/directories to extract from the main package tarball.
 const MAIN_PACKAGE_ENTRIES: &[&str] =
-    &["dist/", "templates/", "rules/", "AGENTS.md", "package.json"];
+    &["binding/", "dist/", "templates/", "rules/", "AGENTS.md", "package.json"];
 
 /// Extract the platform-specific package (binary + .node files).
 ///

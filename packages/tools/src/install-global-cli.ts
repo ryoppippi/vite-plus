@@ -46,7 +46,6 @@ export function installGlobalCli() {
 
     // Use pnpm pack to create tarball
     // - Auto-resolves catalog: dependencies
-    // - Includes binary (already in packages/cli/vp-binary/ after copy-vp-binary)
     execSync(`pnpm pack --pack-destination "${tempDir}"`, {
       cwd: path.join(repoRoot, 'packages/cli'),
       stdio: 'inherit',
@@ -63,9 +62,19 @@ export function installGlobalCli() {
   try {
     const installDir = path.join(os.homedir(), '.vite-plus');
 
+    // Locate the Rust vp binary (built by cargo or copied by CI)
+    const binaryName = isWindows ? 'vp.exe' : 'vp';
+    const binaryPath = path.join(repoRoot, 'target', 'release', binaryName);
+    if (!existsSync(binaryPath)) {
+      console.error(`Error: vp binary not found at ${binaryPath}`);
+      console.error('Run "cargo build -p vite_global_cli --release" first.');
+      process.exit(1);
+    }
+
     const env: Record<string, string> = {
       ...(process.env as Record<string, string>),
       VITE_PLUS_LOCAL_TGZ: tgzPath,
+      VITE_PLUS_LOCAL_BINARY: binaryPath,
       VITE_PLUS_HOME: installDir,
       VITE_PLUS_VERSION: 'local-dev',
       CI: 'true',

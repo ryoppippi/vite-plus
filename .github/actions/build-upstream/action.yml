@@ -116,17 +116,6 @@ runs:
           target/${{ inputs.target }}/release/vp.exe
         key: ${{ steps.cache-key.outputs.key }}
 
-    # Copy Rust CLI binary to packages/cli/vp-binary/ (runs on both cache hit and miss)
-    - name: Copy Rust CLI binary
-      shell: bash
-      run: |
-        mkdir -p packages/cli/vp-binary
-        if [[ "${{ inputs.target }}" == *"windows"* ]]; then
-          cp target/${{ inputs.target }}/release/vp.exe packages/cli/vp-binary/vp.exe
-        else
-          cp target/${{ inputs.target }}/release/vp packages/cli/vp-binary/vp
-        fi
-
     # Build vite-plus TypeScript after native bindings are ready
     - name: Build vite-plus TypeScript packages
       shell: bash

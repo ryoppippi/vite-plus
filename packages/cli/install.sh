@@ -26,6 +26,8 @@ NPM_REGISTRY="${NPM_CONFIG_REGISTRY:-https://registry.npmjs.org}"
 NPM_REGISTRY="${NPM_REGISTRY%/}"
 # Local tarball for development/testing
 LOCAL_TGZ="${VITE_PLUS_LOCAL_TGZ:-}"
+# Local binary path (set by install-global-cli.ts for local dev)
+LOCAL_BINARY="${VITE_PLUS_LOCAL_BINARY:-}"
 
 # Colors for output
 RED='\033[0;31m'
@@ -549,7 +551,7 @@ main() {
 
   # Download and extract native binary and .node files from platform package
   # Also copy JS bundle and assets
-  local items_to_copy=("dist" "templates" "rules" "AGENTS.md" "package.json")
+  local items_to_copy=("binding" "dist" "templates" "rules" "AGENTS.md" "package.json")
 
   if [ -n "$LOCAL_TGZ" ]; then
     # Use local tarball for development/testing
@@ -560,8 +562,12 @@ main() {
     temp_dir=$(mktemp -d)
     tar xzf "$LOCAL_TGZ" -C "$temp_dir" --strip-components=1
 
-    # Copy binary (from vp-binary/ staging directory in merged package)
-    cp "$temp_dir/vp-binary/$binary_name" "$BIN_DIR/"
+    # Copy binary from LOCAL_BINARY env var (set by install-global-cli.ts)
+    if [ -n "$LOCAL_BINARY" ]; then
+      cp "$LOCAL_BINARY" "$BIN_DIR/$binary_name"
+    else
+      error "VITE_PLUS_LOCAL_BINARY must be set when using VITE_PLUS_LOCAL_TGZ"
+    fi
     chmod +x "$BIN_DIR/$binary_name"
 
     # Copy .node files if present

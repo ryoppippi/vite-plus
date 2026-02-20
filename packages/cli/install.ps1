@@ -18,6 +18,8 @@ $InstallDir = if ($env:VITE_PLUS_HOME) { $env:VITE_PLUS_HOME } else { "$env:USER
 $NpmRegistry = if ($env:NPM_CONFIG_REGISTRY) { $env:NPM_CONFIG_REGISTRY.TrimEnd('/') } else { "https://registry.npmjs.org" }
 # Local tarball for development/testing
 $LocalTgz = $env:VITE_PLUS_LOCAL_TGZ
+# Local binary path (set by install-global-cli.ts for local dev)
+$LocalBinary = $env:VITE_PLUS_LOCAL_BINARY
 
 function Write-Info {
     param([string]$Message)
@@ -293,7 +295,7 @@ function Main {
 
     # Download and extract native binary and .node files from platform package
     # Also copy JS bundle and assets
-    $itemsToCopy = @("dist", "templates", "rules", "AGENTS.md", "package.json")
+    $itemsToCopy = @("binding", "dist", "templates", "rules", "AGENTS.md", "package.json")
 
     if ($LocalTgz) {
         # Use local tarball for development/testing
@@ -306,10 +308,11 @@ function Main {
         # Extract the tgz
         & "$env:SystemRoot\System32\tar.exe" -xzf $LocalTgz -C $tempExtract
 
-        # Copy binary (from vp-binary/ staging directory in merged package)
-        $binarySource = Join-Path $tempExtract "package" "vp-binary" $binaryName
-        if (Test-Path $binarySource) {
-            Copy-Item -Path $binarySource -Destination $BinDir -Force
+        # Copy binary from LOCAL_BINARY env var (set by install-global-cli.ts)
+        if ($LocalBinary -and (Test-Path $LocalBinary)) {
+            Copy-Item -Path $LocalBinary -Destination (Join-Path $BinDir $binaryName) -Force
+        } else {
+            Write-Error-Exit "VITE_PLUS_LOCAL_BINARY must be set when using VITE_PLUS_LOCAL_TGZ"
         }
 
         # Copy .node files if present
