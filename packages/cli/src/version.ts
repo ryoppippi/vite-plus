@@ -5,7 +5,6 @@ import { styleText } from 'node:util';
 
 import { VITE_PLUS_NAME } from './utils/constants.js';
 import { detectPackageMetadata } from './utils/package.js';
-import { pkgRoot } from './utils/path.js';
 import { getVitePlusHeader, headline, log } from './utils/terminal.js';
 
 const require = createRequire(import.meta.url);
@@ -29,9 +28,8 @@ interface ToolVersionSpec {
   fallbackPackageJson?: string;
 }
 
-function getGlobalVersion(): string {
-  const pkg: PackageJson = require(path.join(pkgRoot, 'package.json'));
-  return pkg.version;
+function getGlobalVersion(): string | null {
+  return process.env.VITE_PLUS_GLOBAL_VERSION ?? null;
 }
 
 function getLocalMetadata(cwd: string): LocalPackageMetadata | null {
@@ -112,7 +110,7 @@ export async function printVersion(cwd: string) {
   log((await getVitePlusHeader()) + '\n');
   log(headline('Package Versions:'));
   log(
-    `  ${styleText('bold', 'Global vite-plus:')}${' '.repeat(getColumnWidth('Global vite-plus:'))}v${globalVersion}`,
+    `  ${styleText('bold', 'Global vite-plus:')}${' '.repeat(getColumnWidth('Global vite-plus:'))}${globalVersion ? `v${globalVersion}` : 'Not found'}`,
   );
   if (localVersion) {
     log(
