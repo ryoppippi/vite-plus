@@ -1,5 +1,13 @@
 import { execSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readdirSync, rmSync, symlinkSync } from 'node:fs';
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -78,8 +86,9 @@ export function installGlobalCli() {
       VITE_PLUS_HOME: installDir,
       VITE_PLUS_VERSION: 'local-dev',
       CI: 'true',
-      // Skip vp install in install.sh — we set up node_modules manually below
-      // because workspace:* deps resolve to 0.0.0 which don't exist on npm
+      // Skip vp install in install.sh — we handle deps ourselves:
+      // - Local dev: symlink monorepo node_modules
+      // - CI (--tgz): rewrite @voidzero-dev/* deps to file: protocol and npm install
       VITE_PLUS_SKIP_DEPS_INSTALL: '1',
     };
 
@@ -103,7 +112,11 @@ export function installGlobalCli() {
     // Set up node_modules for local dev by rewriting workspace deps to file: protocol
     // and running pnpm install. Production installs use `vp install` in install.sh directly.
     const versionDir = path.join(installDir, 'local-dev');
-    setupLocalDevDeps(versionDir);
+    if (values.tgz) {
+      installCiDeps(versionDir, tgzPath);
+    } else {
+      setupLocalDevDeps(versionDir);
+    }
   } finally {
     // Cleanup temp dir only if we created it
     if (tempDir) {
@@ -136,9 +149,45 @@ function findVpBinary(binaryName: string) {
 }
 
 /**
+ * Install dependencies for CI by rewriting @voidzero-dev/* deps to file: protocol
+ * pointing at sibling tgz files, then running npm install.
+ */
+function installCiDeps(versionDir: string, mainTgzPath: string) {
+  const pkgJsonPath = path.join(versionDir, 'package.json');
+  const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'));
+  const deps: Record<string, string> = pkg.dependencies ?? {};
+  const tgzDir = path.dirname(mainTgzPath);
+
+  let modified = false;
+  for (const [name, version] of Object.entries(deps)) {
+    if (!name.startsWith('@voidzero-dev/')) {
+      continue;
+    }
+    // @voidzero-dev/vite-plus-core@0.0.0 -> voidzero-dev-vite-plus-core-0.0.0.tgz
+    const tgzName = name.replace('@', '').replace('/', '-') + `-${version}.tgz`;
+    const tgzFilePath = path.join(tgzDir, tgzName);
+    if (!existsSync(tgzFilePath)) {
+      console.warn(`Warning: tgz not found for ${name}@${version}: ${tgzFilePath}`);
+      continue;
+    }
+    deps[name] = `file:${tgzFilePath}`;
+    modified = true;
+    console.log(`  ${name}: ${version} -> file:${tgzFilePath}`);
+  }
+
+  if (modified) {
+    writeFileSync(pkgJsonPath, JSON.stringify(pkg, null, 2) + '\n');
+  }
+
+  execSync('npm install --no-audit --no-fund --legacy-peer-deps', {
+    cwd: versionDir,
+    stdio: 'inherit',
+  });
+}
+
+/**
  * Set up dependencies for local dev by symlinking the monorepo's node_modules.
  * This avoids issues with workspace:* protocol deps that don't exist on npm at 0.0.0.
- * Production installs use `vp install` in install.sh which resolves real versions.
  */
 function setupLocalDevDeps(versionDir: string) {
   const nodeModulesLink = path.join(versionDir, 'node_modules');
