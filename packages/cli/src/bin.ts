@@ -1,19 +1,17 @@
 /**
  * Unified entry point for both the local CLI (via bin/vp) and the global CLI (via Rust vp binary).
  *
- * Global commands (create, migrate, --version) are handled by dedicated modules.
- * All other commands are delegated to the Rust core through NAPI bindings, which
- * uses JavaScript tool resolver functions to locate tool binaries.
+ * Global commands (create, migrate, --version) are handled by rolldown-bundled modules.
+ * All other commands are delegated to the Rust core through NAPI bindings.
+ *
+ * When called from the global CLI (detected via VITE_PLUS_CLI_BIN env var), this entry
+ * point first tries to find the project's local vite-plus and delegates to it.
+ * If not found, it falls back to the global installation's NAPI binding.
  */
 
-import { run } from '../binding/index.js';
-import { doc } from './resolve-doc.js';
-import { fmt } from './resolve-fmt.js';
-import { lint } from './resolve-lint.js';
-import { pack } from './resolve-pack.js';
-import { test } from './resolve-test.js';
-import { resolveUniversalViteConfig } from './resolve-vite-config.js';
-import { vite } from './resolve-vite.js';
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 // Parse command line arguments
 let args = process.argv.slice(2);
@@ -34,7 +32,35 @@ if (command === 'create') {
 } else if (command === '--version' || command === '-V') {
   await import('./global/version.js');
 } else {
-  // All other commands — delegate to Rust core via NAPI binding
+  // VITE_PLUS_CLI_BIN is set by the Rust vp binary when calling JS scripts.
+  // If present, we're running from the global CLI and should try the local installation first.
+  const isGlobalCli = !!process.env.VITE_PLUS_CLI_BIN;
+
+  if (isGlobalCli) {
+    const localPkgRoot = findLocalVitePlus(process.cwd());
+    if (localPkgRoot) {
+      // Delegate to the project's local vite-plus
+      await import(pathToFileURL(join(localPkgRoot, 'dist', 'bin.js')).href);
+    } else {
+      // No local vite-plus — fall back to the global installation
+      await runLocalCli();
+    }
+  } else {
+    // Called directly via bin/vp (local npm installation) — use our own NAPI binding
+    await runLocalCli();
+  }
+}
+
+async function runLocalCli() {
+  const { run } = await import('../binding/index.js');
+  const { doc } = await import('./resolve-doc.js');
+  const { fmt } = await import('./resolve-fmt.js');
+  const { lint } = await import('./resolve-lint.js');
+  const { pack } = await import('./resolve-pack.js');
+  const { test } = await import('./resolve-test.js');
+  const { resolveUniversalViteConfig } = await import('./resolve-vite-config.js');
+  const { vite } = await import('./resolve-vite.js');
+
   run({
     lint,
     pack,
@@ -52,4 +78,18 @@ if (command === 'create') {
       console.error('[Vite+] run error:', err);
       process.exit(1);
     });
+}
+
+/**
+ * Find the project's local vite-plus package root directory.
+ * Returns null if vite-plus is not installed in the project.
+ */
+function findLocalVitePlus(cwd: string): string | null {
+  try {
+    const require = createRequire(join(cwd, 'noop.js'));
+    const pkgPath = require.resolve('vite-plus/package.json');
+    return dirname(pkgPath);
+  } catch {
+    return null;
+  }
 }
