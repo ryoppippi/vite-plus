@@ -120,7 +120,7 @@ export async function printVersion(cwd: string) {
     );
   } else {
     log(
-      `  ${styleText('bold', 'Local vite-plus:')}${' '.repeat(getColumnWidth('Local vite-plus:'))}Not installed`,
+      `  ${styleText('bold', 'Local vite-plus:')}${' '.repeat(getColumnWidth('Local vite-plus:'))}Not found`,
     );
   }
 

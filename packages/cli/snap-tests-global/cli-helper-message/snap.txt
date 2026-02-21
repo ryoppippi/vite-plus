@@ -44,7 +44,7 @@ VITE+ - The Unified Toolchain for the Web
 
 PACKAGE VERSIONS:
   Global vite-plus:    v<semver>
-  Local vite-plus:     Not installed
+  Local vite-plus:     Not found
 
 > vp install -h # show install help message
 Install all dependencies, or add packages if package names are provided
