@@ -7123,6 +7123,7 @@ dependencies = [
  "junction",
  "node-semver",
  "owo-colors",
+ "oxc_resolver",
  "serde",
  "serde_json",
  "serial_test",

@@ -200,12 +200,9 @@ impl JsExecutor {
 
     /// Delegate to local vite-plus CLI (Category C commands).
     ///
-    /// Uses the project's runtime version via `download_runtime_for_project`.
-    /// Passes the command through `dist/index.js` which handles:
-    /// - Detecting if vite-plus is installed locally
-    /// - Auto-installing if it's a dependency but not installed
-    /// - Prompting user to add it if not found
-    /// - Delegating to the local CLI's `dist/bin.js`
+    /// Uses `oxc_resolver` to find the project's local vite-plus installation.
+    /// If found, runs the local `dist/bin.js` directly. Otherwise, falls back
+    /// to the global installation's `dist/bin.js`.
     ///
     /// # Arguments
     /// * `project_path` - Path to the project directory
@@ -220,19 +217,43 @@ impl JsExecutor {
         let node_binary = runtime.get_binary_path();
         let bin_prefix = runtime.get_bin_prefix();
 
-        // Get the JS entry point (dist/index.js)
-        let scripts_dir = self.get_scripts_dir()?;
-        let entry_point = scripts_dir.join("bin.js");
+        // Try to resolve vite-plus from the project directory using oxc_resolver
+        let entry_point = Self::resolve_local_vite_plus(project_path).unwrap_or_else(|| {
+            // Fall back to the global installation's bin.js
+            let scripts_dir = self.get_scripts_dir().expect("scripts dir not found");
+            scripts_dir.join("bin.js")
+        });
 
-        tracing::debug!("Delegating to local CLI via JS entry point: {:?} {:?}", entry_point, args);
+        tracing::debug!("Delegating to CLI via JS entry point: {:?} {:?}", entry_point, args);
 
-        // Execute dist/index.js with the command and args
-        // The JS layer handles detecting/installing local vite-plus
         let mut cmd = Self::create_js_command(&node_binary, &bin_prefix);
         cmd.arg(entry_point.as_path()).args(args).current_dir(project_path.as_path());
 
         let status = cmd.status().await?;
         Ok(status)
+    }
+
+    /// Resolve the local vite-plus package's `dist/bin.js` from the project directory.
+    fn resolve_local_vite_plus(project_path: &AbsolutePath) -> Option<AbsolutePathBuf> {
+        use oxc_resolver::{ResolveOptions, Resolver};
+
+        let resolver = Resolver::new(ResolveOptions {
+            condition_names: vec!["import".into(), "node".into()],
+            ..ResolveOptions::default()
+        });
+
+        // Resolve vite-plus/package.json from the project directory to find the package root
+        let resolved = resolver.resolve(project_path, "vite-plus/package.json").ok()?;
+        let pkg_dir = resolved.path().parent()?;
+        let bin_js = pkg_dir.join("dist").join("bin.js");
+
+        if bin_js.exists() {
+            tracing::debug!("Found local vite-plus at {:?}", bin_js);
+            AbsolutePathBuf::new(bin_js)
+        } else {
+            tracing::debug!("Local vite-plus found but dist/bin.js missing at {:?}", bin_js);
+            None
+        }
     }
 }
 
