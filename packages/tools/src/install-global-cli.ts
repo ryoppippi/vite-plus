@@ -1,11 +1,5 @@
 import { execSync } from 'node:child_process';
-import {
-  existsSync,
-  mkdtempSync,
-  readdirSync,
-  rmSync,
-  symlinkSync,
-} from 'node:fs';
+import { existsSync, mkdtempSync, readdirSync, rmSync, symlinkSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -70,9 +64,9 @@ export function installGlobalCli() {
 
     // Locate the Rust vp binary (built by cargo or copied by CI)
     const binaryName = isWindows ? 'vp.exe' : 'vp';
-    const binaryPath = path.join(repoRoot, 'target', 'release', binaryName);
-    if (!existsSync(binaryPath)) {
-      console.error(`Error: vp binary not found at ${binaryPath}`);
+    const binaryPath = findVpBinary(binaryName);
+    if (!binaryPath) {
+      console.error(`Error: vp binary not found in ${path.join(repoRoot, 'target')}`);
       console.error('Run "cargo build -p vite_global_cli --release" first.');
       process.exit(1);
     }
@@ -116,6 +110,29 @@ export function installGlobalCli() {
       rmSync(tempDir, { recursive: true, force: true });
     }
   }
+}
+
+// Find the vp binary in the target directory.
+// Checks target/release/ first (local builds), then target/<triple>/release/ (cross-compiled CI builds).
+function findVpBinary(binaryName: string) {
+  // 1. Direct release build: target/release/vp
+  const directPath = path.join(repoRoot, 'target', 'release', binaryName);
+  if (existsSync(directPath)) {
+    return directPath;
+  }
+
+  // 2. Cross-compiled build: target/<triple>/release/vp (CI builds with --target)
+  const targetDir = path.join(repoRoot, 'target');
+  if (existsSync(targetDir)) {
+    for (const entry of readdirSync(targetDir)) {
+      const crossPath = path.join(targetDir, entry, 'release', binaryName);
+      if (existsSync(crossPath)) {
+        return crossPath;
+      }
+    }
+  }
+
+  return null;
 }
 
 /**
