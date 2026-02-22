@@ -210,11 +210,14 @@ impl JsExecutor {
         args: &[String],
     ) -> Result<ExitStatus, Error> {
         // Try to resolve vite-plus from the project directory using oxc_resolver
-        let entry_point = Self::resolve_local_vite_plus(project_path).unwrap_or_else(|| {
-            // Fall back to the global installation's bin.js
-            let scripts_dir = self.get_scripts_dir().expect("scripts dir not found");
-            scripts_dir.join("bin.js")
-        });
+        let entry_point = match Self::resolve_local_vite_plus(project_path) {
+            Some(path) => path,
+            None => {
+                // Fall back to the global installation's bin.js
+                let scripts_dir = self.get_scripts_dir()?;
+                scripts_dir.join("bin.js")
+            }
+        };
 
         tracing::debug!("Delegating to CLI via JS entry point: {:?} {:?}", entry_point, args);
 
