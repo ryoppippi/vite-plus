@@ -58,7 +58,7 @@ Check the nearest `package.json` from the current working directory for `vite-pl
 
 **Decision: Check `package.json` only, NOT `node_modules`**
 
-- If vite-plus is listed in `package.json` but not installed, the existing JS layer handles auto-installation
+- If vite-plus is listed in `package.json` but not installed, the user must run `install` manually
 - If vite-plus is NOT listed in `package.json`, we fall back to PM run
 - Checking `node_modules` would be fragile (hoisted deps, workspaces) and inconsistent with the intent
 

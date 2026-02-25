@@ -1,7 +1,4 @@
 {
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     {
       "command": "vp create vite:application --no-interactive # create vite app with default values",

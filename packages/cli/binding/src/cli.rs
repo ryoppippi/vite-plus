@@ -644,32 +644,6 @@ impl UserConfigLoader for VitePlusConfigLoader {
     }
 }
 
-/// Create auto-install synthetic plan request
-async fn create_install_synthetic_request(
-    cwd: &AbsolutePathBuf,
-) -> Result<SyntheticPlanRequest, Error> {
-    let package_manager = vite_install::PackageManager::builder(cwd).build_with_default().await?;
-    let resolve_command = package_manager.resolve_install_command(&vec![]);
-
-    let mut envs: FxHashMap<Arc<OsStr>, Arc<OsStr>> = std::env::vars_os()
-        .map(|(k, v)| (Arc::from(k.as_os_str()), Arc::from(v.as_os_str())))
-        .collect();
-
-    for (k, v) in resolve_command.envs {
-        envs.insert(Arc::from(OsStr::new(&k)), Arc::from(OsStr::new(&v)));
-    }
-
-    Ok(SyntheticPlanRequest {
-        program: Arc::<OsStr>::from(OsStr::new(&resolve_command.bin_path).to_os_string()),
-        args: resolve_command.args.into_iter().map(Str::from).collect(),
-        cache_config: UserCacheConfig::with_config(EnabledCacheConfig {
-            envs: None,
-            pass_through_envs: None,
-        }),
-        envs: Arc::new(envs),
-    })
-}
-
 /// Execute a synthesizable subcommand directly (not through vite-task Session).
 /// No caching, no task graph, no dependency resolution.
 async fn execute_direct_subcommand(
@@ -765,21 +739,6 @@ async fn execute_vite_task_command(
         command_handler: &mut command_handler,
         user_config_loader: &mut config_loader,
     })?;
-
-    // Auto-install (using Session::exec)
-    if env::var_os("VITE_DISABLE_AUTO_INSTALL") != Some("1".into()) {
-        if let Ok(install_request) = create_install_synthetic_request(&cwd).await {
-            let cache_key: Arc<[Str]> = vec![Str::from("install")].into();
-            let status = session
-                .execute_synthetic(install_request, cache_key, true)
-                .await
-                .map_err(|e| Error::Anyhow(e))?;
-            if status != ExitStatus::SUCCESS {
-                command_handler.cleanup_temp_files().await;
-                return Ok(status);
-            }
-        }
-    }
 
     // Main execution (consumes session)
     let result = session.main(command).await.map_err(|e| Error::Anyhow(e));

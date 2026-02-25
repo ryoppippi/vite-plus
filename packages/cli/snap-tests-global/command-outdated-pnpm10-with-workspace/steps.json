@@ -1,8 +1,5 @@
 {
   "ignoredPlatforms": ["win32"],
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vp install",
     "vp outdated testnpm2 -w # should outdated in workspace root",

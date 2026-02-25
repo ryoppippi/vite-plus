@@ -1,7 +1,4 @@
 {
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vp pm view --help # should show help",
     "vp pm view testnpm2 # should view lodash package information (uses npm view)",

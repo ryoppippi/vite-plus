@@ -1,8 +1,5 @@
 {
   "ignoredPlatforms": ["win32"],
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "VITE_MY_VAR=1 vp run build",
     "VITE_MY_VAR=1 vp run build # should hit cache",

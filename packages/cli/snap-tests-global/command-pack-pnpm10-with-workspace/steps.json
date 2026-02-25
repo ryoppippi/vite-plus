@@ -1,8 +1,5 @@
 {
   "ignoredPlatforms": ["win32"],
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vp pm pack && rm -rf *.tgz # should pack current workspace root",
     "vp pm pack --recursive --json > out.json && tool json-sort out.json '_.name' && cat out.json && rm -rf *.tgz # should pack all packages in workspace",

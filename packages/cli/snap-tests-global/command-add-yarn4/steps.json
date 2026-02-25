@@ -1,8 +1,5 @@
 {
   "ignoredPlatforms": ["win32"],
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vp add --help # should show help",
     "vp add testnpm2 -D && cat package.json # should add package as dev dependencies",

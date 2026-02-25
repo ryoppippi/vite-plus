@@ -1,8 +1,5 @@
 {
   "ignoredPlatforms": [],
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vp run hello # create the cache for 'echo hello'",
     "vp run hello # hit the cache",

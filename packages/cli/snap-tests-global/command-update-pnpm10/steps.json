@@ -1,8 +1,5 @@
 {
   "ignoredPlatforms": ["win32"],
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vp update --help # should show help",
     "vp update testnpm2 && cat package.json # should update package within semver range",

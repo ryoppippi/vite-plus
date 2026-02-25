@@ -1,8 +1,5 @@
 {
   "ignoredPlatforms": ["win32"],
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "mkdir -p ../unlink-test-lib-npm && echo '{\"name\": \"unlink-test-lib-npm\", \"version\": \"1.0.0\"}' > ../unlink-test-lib-npm/package.json # create test library",
     "vp link ../unlink-test-lib-npm && cat package.json # link the library first",

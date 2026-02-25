@@ -173,7 +173,7 @@ These commands delegate to the local `vite-plus` package through the JS entry po
 | ---------------------------------------------------------------- | -------------------------------------------------------- |
 | `dev`, `build`, `test`, `lint`, `fmt`, `run`, `preview`, `cache` | Rust CLI → Managed Node.js → `dist/index.js` → local CLI |
 
-**Note:** The global CLI uses `vite_js_runtime` to ensure Node.js is available, resolving the version from the project's `devEngines.runtime` configuration. The JS entry point handles detecting if vite-plus is installed locally, auto-installing if needed, and delegating to the local CLI's `dist/bin.js`.
+**Note:** The global CLI uses `vite_js_runtime` to ensure Node.js is available, resolving the version from the project's `devEngines.runtime` configuration. The JS entry point handles detecting if vite-plus is installed locally and delegating to the local CLI's `dist/bin.js`.
 
 #### Category D: Pure Rust Commands (No Node.js Required)
 
@@ -375,7 +375,7 @@ impl JsExecutor {
 - `vite_js_runtime` handles all `devEngines.runtime` logic internally (reading package.json, resolving versions, caching)
 - CLI commands use CLI's package.json directory (e.g., `packages/global/`)
 - Project delegation uses project's directory and passes commands through `dist/index.js`
-- The JS entry point handles local CLI detection, auto-installation, and delegation
+- The JS entry point handles local CLI detection and delegation
 
 ### Implementation Phases
 
@@ -1005,7 +1005,7 @@ pub enum Error {
 }
 ```
 
-**Note:** Local CLI detection errors are handled by the JS layer (`dist/index.js`), which provides better UX with auto-install prompts and user-friendly messages.
+**Note:** Local CLI detection errors are handled by the JS layer (`dist/index.js`), which provides user-friendly messages.
 
 ### Local Development
 

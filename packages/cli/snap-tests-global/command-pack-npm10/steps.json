@@ -1,8 +1,5 @@
 {
   "ignoredPlatforms": ["win32"],
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vp pm pack --json && rm -rf *.tgz # should pack current package",
     "vp pm pack --pack-destination ./dist --json && rm -rf ./dist # should pack with destination",

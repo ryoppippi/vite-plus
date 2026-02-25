@@ -1,7 +1,4 @@
 {
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vp -h # help message",
     "vp pack -h # pack help message",

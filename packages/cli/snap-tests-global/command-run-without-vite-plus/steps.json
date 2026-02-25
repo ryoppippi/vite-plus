@@ -1,7 +1,4 @@
 {
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "ignoredPlatforms": ["win32"],
   "commands": [
     "vp run hello # should fall back to pnpm run when no vite-plus dependency",

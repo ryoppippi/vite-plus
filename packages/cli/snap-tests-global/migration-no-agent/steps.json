@@ -1,7 +1,4 @@
 {
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vp migrate --no-agent --no-interactive # migration with --no-agent should skip agent instructions",
     "ls -la | grep -E '(AGENTS|CLAUDE)' || echo 'No agent file created' # verify no agent file was created"

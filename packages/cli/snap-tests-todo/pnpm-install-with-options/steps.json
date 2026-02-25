@@ -1,8 +1,5 @@
 {
   "ignoredPlatforms": ["win32"],
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vite install --help | head -n 20 # print help message",
     "vite install --prod # https://pnpm.io/cli/install#--prod--p",

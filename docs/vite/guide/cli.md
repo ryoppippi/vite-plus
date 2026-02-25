@@ -367,12 +367,11 @@ vp cache clean
 
 ### Environment Variables
 
-| Variable                    | Description                                             |
-| --------------------------- | ------------------------------------------------------- |
-| `VITE_LOG`                  | Set logging level (e.g., `VITE_LOG=debug`)              |
-| `VITE_DISABLE_AUTO_INSTALL` | Set to `1` to disable automatic dependency installation |
-| `VITE_TASK_EXECUTION_ENV`   | Internal: indicates running inside vite task            |
-| `VITE_TASK_EXECUTION_ID`    | Internal: unique ID for task execution                  |
+| Variable                  | Description                                  |
+| ------------------------- | -------------------------------------------- |
+| `VITE_LOG`                | Set logging level (e.g., `VITE_LOG=debug`)   |
+| `VITE_TASK_EXECUTION_ENV` | Internal: indicates running inside vite task |
+| `VITE_TASK_EXECUTION_ID`  | Internal: unique ID for task execution       |
 
 ### Execution Modes
 

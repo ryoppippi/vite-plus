@@ -1,8 +1,5 @@
 {
   "ignoredPlatforms": ["win32"],
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vp pm pack # should pack current package",
     "vp pm pack --out ./dist/package.tgz # should pack with output file",

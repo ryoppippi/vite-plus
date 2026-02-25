@@ -1,8 +1,5 @@
 {
   "ignoredPlatforms": ["win32"],
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vp update testnpm2 -- --no-audit && cat package.json # should update package within semver range",
     "vp up testnpm2 --latest -- --no-audit && cat package.json # should to absolute latest version",

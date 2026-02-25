@@ -1,8 +1,5 @@
 {
   "ignoredPlatforms": ["win32", "linux"],
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vp link -h # should show help message",
     "vp install # install initial dependencies",

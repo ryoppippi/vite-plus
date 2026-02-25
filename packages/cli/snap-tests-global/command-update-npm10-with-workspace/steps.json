@@ -1,8 +1,5 @@
 {
   "ignoredPlatforms": ["win32"],
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vp update testnpm2 -w -- --no-audit && cat package.json # should update in workspace root",
     "vp update testnpm2 --latest --filter app -- --no-audit && cat packages/app/package.json # should update in specific package",

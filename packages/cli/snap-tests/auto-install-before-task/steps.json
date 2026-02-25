@@ -1,7 +1,0 @@
-{
-  "ignoredPlatforms": [],
-  "commands": [
-    "vp run hello # first run - should show pnpm install output",
-    "vp run hello # second run - no pnpm install output (cache hit, silent)"
-  ]
-}

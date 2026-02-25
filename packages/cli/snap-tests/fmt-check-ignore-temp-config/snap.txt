@@ -1,6 +1,7 @@
 [1]> vp fmt --check # Test that vp fmt --check ignores the temp config file
 Checking formatting...
 src/valid.js (<variable>ms)
+steps.json (<variable>ms)
 
-Format issues found in above 1 files. Run without `--check` to fix.
+Format issues found in above 2 files. Run without `--check` to fix.
 Finished in <variable>ms on 4 files using <variable> threads.

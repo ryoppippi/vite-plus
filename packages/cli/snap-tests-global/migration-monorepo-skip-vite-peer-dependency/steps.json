@@ -1,7 +1,4 @@
 {
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vp migrate --no-interactive # migration should check each package's peerDependencies",
     "cat packages/vite-plugin/src/index.ts # vite-plugin has vite in peerDeps: vite NOT rewritten, vitest rewritten",

@@ -1,7 +1,4 @@
 {
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vp pm config --help # should show help",
     "vp pm config list --location project > /dev/null # should list all project configuration",

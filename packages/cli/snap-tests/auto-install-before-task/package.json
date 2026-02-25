@@ -1,9 +1,0 @@
-{
-  "name": "auto-install-before-task",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "hello": "echo hello"
-  },
-  "packageManager": "pnpm@10.15.1"
-}

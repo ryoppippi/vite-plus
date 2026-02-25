@@ -1,7 +1,4 @@
 {
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vp dedupe --help # should show help",
     "vp dedupe && cat package.json # should dedupe dependencies",

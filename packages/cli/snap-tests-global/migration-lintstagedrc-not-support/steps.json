@@ -1,7 +1,4 @@
 {
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vp migrate --no-interactive # migration should not support non-json format lintstagedrc",
     "cat .lintstagedrc # check .lintstagedrc is not updated",

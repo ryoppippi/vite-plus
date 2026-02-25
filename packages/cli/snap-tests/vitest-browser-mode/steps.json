@@ -1,8 +1,5 @@
 {
   "ignoredPlatforms": ["win32", "darwin", "linux"],
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vp run test",
     "echo //comment >> src/foo.js",

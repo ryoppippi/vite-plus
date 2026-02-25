@@ -1,7 +1,4 @@
 {
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vp install --no-frozen-lockfile --silent # install dependencies work",
     "mkdir -p packages/sub-project && echo '{\"name\": \"sub-project\", \"dependencies\": { \"testnpm2\": \"1.0.0\" }}' > packages/sub-project/package.json # create sub project and package.json",

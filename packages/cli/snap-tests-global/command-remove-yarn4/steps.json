@@ -1,8 +1,5 @@
 {
   "ignoredPlatforms": ["win32"],
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vp remove testnpm2 -D && cat package.json # should error when remove not exists package",
     "vp add testnpm2 && vp add -D test-vite-plus-install && vp add -O test-vite-plus-package-optional && cat package.json # should add packages to dependencies",

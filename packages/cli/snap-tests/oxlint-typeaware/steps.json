@@ -1,13 +1,9 @@
 {
   "ignoredPlatforms": [""],
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "vp run lint",
     "echo //comment >> types.ts",
     "vp run lint # non-type-aware linting doesn't read types.ts",
-
     "vp run lint-typeaware",
     "echo //comment >> types.ts",
     "vp run lint-typeaware # type-aware linting reads types.ts"

@@ -1,8 +1,5 @@
 {
   "ignoredPlatforms": ["win32"],
-  "env": {
-    "VITE_DISABLE_AUTO_INSTALL": "1"
-  },
   "commands": [
     "test ! -f package.json && echo 'no package.json' # verify no package.json exists",
     "vp install --silent && cat package.json # should auto-create package.json and install",
