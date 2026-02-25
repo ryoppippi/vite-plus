@@ -130,6 +130,10 @@ export async function snapTest() {
     if (caseName.startsWith('.')) {
       continue;
     } // Skip hidden files like .DS_Store
+    if (!fs.existsSync(path.join(casesDir, caseName, 'steps.json'))) {
+      console.warn('Warning: %s has no steps.json, skipping', caseName);
+      continue;
+    }
     if (caseName.includes(filter)) {
       taskFunctions.push(() => runTestCase(caseName, tempTmpDir, casesDir, values['bin-dir']));
     }
