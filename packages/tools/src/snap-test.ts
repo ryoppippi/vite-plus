@@ -126,17 +126,28 @@ export async function snapTest() {
   const casesDir = path.resolve(values.dir || 'snap-tests');
 
   const taskFunctions: (() => Promise<void>)[] = [];
+  const missingStepsJson: string[] = [];
   for (const caseName of fs.readdirSync(casesDir)) {
     if (caseName.startsWith('.')) {
       continue;
-    } // Skip hidden files like .DS_Store
-    if (!fs.existsSync(path.join(casesDir, caseName, 'steps.json'))) {
-      console.warn('Warning: %s has no steps.json, skipping', caseName);
+    }
+    const caseDir = path.join(casesDir, caseName);
+    if (!fs.statSync(caseDir).isDirectory()) {
+      continue;
+    }
+    if (!fs.existsSync(path.join(caseDir, 'steps.json'))) {
+      missingStepsJson.push(caseName);
       continue;
     }
     if (caseName.includes(filter)) {
       taskFunctions.push(() => runTestCase(caseName, tempTmpDir, casesDir, values['bin-dir']));
     }
+  }
+
+  if (missingStepsJson.length > 0) {
+    throw new Error(
+      `${missingStepsJson.length} test case(s) missing steps.json: ${missingStepsJson.join(', ')}`,
+    );
   }
 
   if (taskFunctions.length > 0) {
