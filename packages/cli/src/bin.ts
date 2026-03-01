@@ -48,7 +48,7 @@ if (command === 'create') {
   if (process.env.VITE_LOG) {
     const processUptime = (process.uptime() * 1000).toFixed(2);
     const jsModuleLoad = (performance.now() - jsStartTime).toFixed(2);
-    console.log(
+    console.error(
       `[vite-plus] process uptime: ${processUptime}ms, JS module load: ${jsModuleLoad}ms`,
     );
   }
