@@ -41,18 +41,18 @@ Timestamps are relative to process start (microseconds).
 
 ### Breakdown (6 invocations, vibe-dashboard, Ubuntu)
 
-| Stage | Time from start | Duration |
-|---|---|---|
-| argv0 processing | 37-57μs | ~40μs |
-| Runtime resolution start | 482-684μs | ~500μs |
-| Node.js version selected | 714-1042μs | ~300μs |
-| LTS alias resolved | 723-1075μs | ~10μs |
-| Version index cache check | 1181-1541μs | ~400μs |
-| Node.js version resolved | 1237-1593μs | ~50μs |
-| Node.js cache confirmed | 1302-1627μs | ~50μs |
-| **oxc_resolver start** | **3058-7896μs** | — |
-| oxc_resolver complete | 3230-8072μs | **~170μs** |
-| Delegation to Node.js | 3275-8160μs | ~40μs |
+| Stage                     | Time from start | Duration   |
+| ------------------------- | --------------- | ---------- |
+| argv0 processing          | 37-57μs         | ~40μs      |
+| Runtime resolution start  | 482-684μs       | ~500μs     |
+| Node.js version selected  | 714-1042μs      | ~300μs     |
+| LTS alias resolved        | 723-1075μs      | ~10μs      |
+| Version index cache check | 1181-1541μs     | ~400μs     |
+| Node.js version resolved  | 1237-1593μs     | ~50μs      |
+| Node.js cache confirmed   | 1302-1627μs     | ~50μs      |
+| **oxc_resolver start**    | **3058-7896μs** | —          |
+| oxc_resolver complete     | 3230-8072μs     | **~170μs** |
+| Delegation to Node.js     | 3275-8160μs     | ~40μs      |
 
 ### Key Observations
 
@@ -67,11 +67,11 @@ Measured from NAPI-side Chrome traces (frm-stack project).
 
 The NAPI `run()` function is first called at **~3.7ms** from Node.js process start:
 
-| Event | Time (μs) | Notes |
-|---|---|---|
-| NAPI `run()` entered | 3,682 | First trace event from NAPI module |
-| `napi_run: start` | 3,950 | After ThreadsafeFunction setup |
-| `cli::main` span begins | 4,116 | CLI argument processing starts |
+| Event                   | Time (μs) | Notes                              |
+| ----------------------- | --------- | ---------------------------------- |
+| NAPI `run()` entered    | 3,682     | First trace event from NAPI module |
+| `napi_run: start`       | 3,950     | After ThreadsafeFunction setup     |
+| `cli::main` span begins | 4,116     | CLI argument processing starts     |
 
 This means **Node.js startup + ES module loading + NAPI binding initialization takes ~3.7ms**.
 
@@ -112,13 +112,13 @@ From Chrome trace, all times in μs from process start:
 
 The **`load_user_config_file`** callback (which calls back into JavaScript to load `vite.config.ts` for each workspace package) dominates the task graph loading time:
 
-| Config Load | Duration | Notes |
-|---|---|---|
-| First package | **164ms** | Cold import: requires JS module resolution + transpilation |
-| Second package | **12ms** | Warm: shared dependencies already cached |
-| Third package | **3.4ms** | Warm: nearly all deps cached |
-| Fourth package (different deps) | **741ms** | Cold: imports new heavy dependencies |
-| Subsequent packages | **3-5ms** each | All warm |
+| Config Load                     | Duration       | Notes                                                      |
+| ------------------------------- | -------------- | ---------------------------------------------------------- |
+| First package                   | **164ms**      | Cold import: requires JS module resolution + transpilation |
+| Second package                  | **12ms**       | Warm: shared dependencies already cached                   |
+| Third package                   | **3.4ms**      | Warm: nearly all deps cached                               |
+| Fourth package (different deps) | **741ms**      | Cold: imports new heavy dependencies                       |
+| Subsequent packages             | **3-5ms** each | All warm                                                   |
 
 **For frm-stack (10 packages), total config loading: ~930ms** — this is the single largest cost.
 
@@ -139,31 +139,31 @@ The `js_resolver` callback (which locates the test runner binary via JavaScript)
 
 ### Session Init Timing Comparison
 
-| Stage | frm-stack (10 packages) | Notes |
-|---|---|---|
-| Session init | ~60μs | Minimal setup |
-| load_package_graph | ~4ms | Workspace discovery |
-| load_user_config_file (all) | **~930ms** | JS callbacks, dominant cost |
-| handle_command + resolve | ~1.4ms | Tool binary resolution |
-| **Total before task execution** | **~936ms** | |
+| Stage                           | frm-stack (10 packages) | Notes                       |
+| ------------------------------- | ----------------------- | --------------------------- |
+| Session init                    | ~60μs                   | Minimal setup               |
+| load_package_graph              | ~4ms                    | Workspace discovery         |
+| load_user_config_file (all)     | **~930ms**              | JS callbacks, dominant cost |
+| handle_command + resolve        | ~1.4ms                  | Tool binary resolution      |
+| **Total before task execution** | **~936ms**              |                             |
 
 ## Phase 4: Task Execution (vibe-dashboard)
 
 ### Spawn Timing (First Run — Cold)
 
-| Command | Spawn 1 (setup) | Spawn 2 (execution) | Total |
-|---|---|---|---|
-| `vp fmt` | 1.05s (977 reads, 50 writes) | 1.00s (163 reads, 1 write) | ~2.1s |
-| `vp test` | 0.96s (977 reads, 50 writes) | 5.71s (4699 reads, 26 writes) | ~6.7s |
+| Command        | Spawn 1 (setup)              | Spawn 2 (execution)           | Total |
+| -------------- | ---------------------------- | ----------------------------- | ----- |
+| `vp fmt`       | 1.05s (977 reads, 50 writes) | 1.00s (163 reads, 1 write)    | ~2.1s |
+| `vp test`      | 0.96s (977 reads, 50 writes) | 5.71s (4699 reads, 26 writes) | ~6.7s |
 | `vp run build` | 0.95s (977 reads, 50 writes) | 1.61s (3753 reads, 17 writes) | ~2.6s |
 
 ### Spawn Timing (Second Run — Cache Available)
 
-| Command | Spawn 1 (setup) | Spawn 2 (execution) | Total | Delta |
-|---|---|---|---|---|
-| `vp fmt` | 0.95s (977 reads, 50 writes) | 0.97s (167 reads, 3 writes) | ~1.9s | -0.2s |
-| `vp test` | 0.95s (977 reads, 50 writes) | 4.17s (1930 reads, 4 writes) | ~5.1s | **-1.6s** |
-| `vp run build` | 0.96s (977 reads, 50 writes) | **cache hit (replayed)** | ~1.0s | **-1.6s** |
+| Command        | Spawn 1 (setup)              | Spawn 2 (execution)          | Total | Delta     |
+| -------------- | ---------------------------- | ---------------------------- | ----- | --------- |
+| `vp fmt`       | 0.95s (977 reads, 50 writes) | 0.97s (167 reads, 3 writes)  | ~1.9s | -0.2s     |
+| `vp test`      | 0.95s (977 reads, 50 writes) | 4.17s (1930 reads, 4 writes) | ~5.1s | **-1.6s** |
+| `vp run build` | 0.96s (977 reads, 50 writes) | **cache hit (replayed)**     | ~1.0s | **-1.6s** |
 
 ### Key Observations
 
@@ -175,11 +175,11 @@ The `js_resolver` callback (which locates the test runner binary via JavaScript)
 
 vite-task implements a file-system-aware task cache at `node_modules/.vite/task-cache`.
 
-| Command | First Run | Cache Run | Cache Hit? | Savings |
-|---|---|---|---|---|
-| `vp fmt` | 2.1s | 1.9s | No | — |
-| `vp test` | 6.7s | 5.1s | No | -1.6s (OS cache) |
-| `vp run build` | 2.6s | 1.0s | **Yes** | **-1.6s** (1.19s from task cache) |
+| Command        | First Run | Cache Run | Cache Hit? | Savings                           |
+| -------------- | --------- | --------- | ---------- | --------------------------------- |
+| `vp fmt`       | 2.1s      | 1.9s      | No         | —                                 |
+| `vp test`      | 6.7s      | 5.1s      | No         | -1.6s (OS cache)                  |
+| `vp run build` | 2.6s      | 1.0s      | **Yes**    | **-1.6s** (1.19s from task cache) |
 
 **Only `vp run build` was cache-eligible.** Formatting and test commands are not cached (side effects / non-deterministic outputs).
 
@@ -250,22 +250,23 @@ T+940ms     Task execution starts (child process spawn)
 
 ## Summary of Bottlenecks
 
-| Bottleneck | Time | % of overhead | Optimization opportunity |
-|---|---|---|---|
-| vite.config.ts loading (cold) | **164-741ms** per package | **99%** | Cache config results, lazy loading, parallel loading |
-| Spawn 1 (pnpm/setup) | **~1s** | — | Persistent process, avoid re-resolving |
-| load_package_graph | **~4ms** | <1% | Already fast |
-| Session init | **~60μs** | <0.01% | Already fast |
-| Global CLI overhead | **~5ms** | <0.5% | Already fast |
-| Node.js + NAPI startup | **~3.7ms** | <0.4% | Already fast |
-| oxc_resolver | **~170μs** | <0.02% | Already fast |
-| js_resolver callback | **~1.25ms** | <0.1% | Already fast |
+| Bottleneck                    | Time                      | % of overhead | Optimization opportunity                             |
+| ----------------------------- | ------------------------- | ------------- | ---------------------------------------------------- |
+| vite.config.ts loading (cold) | **164-741ms** per package | **99%**       | Cache config results, lazy loading, parallel loading |
+| Spawn 1 (pnpm/setup)          | **~1s**                   | —             | Persistent process, avoid re-resolving               |
+| load_package_graph            | **~4ms**                  | <1%           | Already fast                                         |
+| Session init                  | **~60μs**                 | <0.01%        | Already fast                                         |
+| Global CLI overhead           | **~5ms**                  | <0.5%         | Already fast                                         |
+| Node.js + NAPI startup        | **~3.7ms**                | <0.4%         | Already fast                                         |
+| oxc_resolver                  | **~170μs**                | <0.02%        | Already fast                                         |
+| js_resolver callback          | **~1.25ms**               | <0.1%         | Already fast                                         |
 
 **The single most impactful optimization would be caching or parallelizing `load_user_config_file` calls.** The first cold load takes 164ms, and when new heavy dependencies are encountered, loads can take 741ms. For a 10-package monorepo, this accumulates to ~930ms of config loading before any task runs.
 
 ## Inter-Process Communication
 
 vite-task uses Unix shared memory (`/dev/shm`) for parent-child process communication during task execution:
+
 - Creates persistent mapping at `/shmem_<hash>`
 - Maps memory into address space for fast IPC
 - Cleaned up after spawn completion
@@ -273,11 +274,13 @@ vite-task uses Unix shared memory (`/dev/shm`) for parent-child process communic
 ## Known Issues
 
 ### Windows: Trace files break formatter
+
 When `VITE_LOG_OUTPUT=chrome-json` is set, trace files (`trace-*.json`) are written to the project working directory. On Windows, `vp fmt` picks up these files and fails with "Unterminated string constant" because the trace files contain very long PATH strings.
 
 **Recommendation**: Add `trace-*.json` to formatter ignore patterns, or write trace files to a dedicated directory outside the workspace.
 
 ### NAPI trace files empty for some projects
+
 The Chrome tracing `FlushGuard` stored in a static `OnceLock` is never dropped when `process.exit()` is called. Fixed by adding `shutdownTracing()` NAPI function called before exit (commit `72b23304`). Some projects (frm-stack) produce traces because their exit path differs.
 
 ## Methodology
