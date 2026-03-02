@@ -60,9 +60,11 @@ if (existsSync(tsPath) || existsSync(jsPath)) {
     'utf-8',
   );
 } else {
-  viteConfigPath = tsPath;
+  // Use .js to avoid TypeScript-ESLint "not found by the project service" errors
+  // in projects whose tsconfig.json doesn't include vite.config.ts.
+  viteConfigPath = jsPath;
   await writeFile(
-    tsPath,
+    jsPath,
     `import { defineConfig } from 'vite-plus';\n\nexport default defineConfig({\n  run: { cacheScripts: true },\n});\n`,
     'utf-8',
   );
