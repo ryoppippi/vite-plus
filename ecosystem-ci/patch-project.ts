@@ -1,4 +1,5 @@
 import { execSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -45,8 +46,11 @@ execSync(`${cli} migrate --no-agent --no-interactive`, {
   },
 });
 
-// Enable cacheScripts so e2e tests exercise the cache hit/miss paths
-const viteConfigPath = join(cwd, 'vite.config.ts');
+// Enable cacheScripts so e2e tests exercise the cache hit/miss paths.
+// Migration preserves the existing config extension (.ts or .js).
+const viteConfigPath = existsSync(join(cwd, 'vite.config.ts'))
+  ? join(cwd, 'vite.config.ts')
+  : join(cwd, 'vite.config.js');
 const viteConfig = await readFile(viteConfigPath, 'utf-8');
 await writeFile(
   viteConfigPath,
