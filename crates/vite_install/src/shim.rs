@@ -56,7 +56,7 @@ pub fn native_cmd_shim(relative_file: &str) -> String {
     formatdoc! {
         r#"
         @SETLOCAL
-        "%~dp0\{relative_file}" %*
+        @"%~dp0\{relative_file}" %*
         "#,
         relative_file = relative_file.replace('/', "\\")
     }
