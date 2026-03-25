@@ -486,7 +486,13 @@ fn get_bun_platform_package_name() -> Result<&'static str, Error> {
     let name = match (env::consts::OS, env::consts::ARCH) {
         ("macos", "aarch64") => "@oven/bun-darwin-aarch64",
         ("macos", "x86_64") => "@oven/bun-darwin-x64",
+        #[cfg(target_env = "musl")]
+        ("linux", "aarch64") => "@oven/bun-linux-aarch64-musl",
+        #[cfg(not(target_env = "musl"))]
         ("linux", "aarch64") => "@oven/bun-linux-aarch64",
+        #[cfg(target_env = "musl")]
+        ("linux", "x86_64") => "@oven/bun-linux-x64-musl",
+        #[cfg(not(target_env = "musl"))]
         ("linux", "x86_64") => "@oven/bun-linux-x64",
         ("windows", "x86_64") => "@oven/bun-windows-x64",
         ("windows", "aarch64") => "@oven/bun-windows-aarch64",
@@ -2452,13 +2458,18 @@ mod tests {
 
     #[test]
     fn test_get_bun_platform_package_name() {
-        // Just verify it returns a valid package name for the current platform
         let result = get_bun_platform_package_name();
         assert!(result.is_ok(), "Should return a platform package name");
         let name = result.unwrap();
         assert!(
             name.starts_with("@oven/bun-"),
             "Package name should start with @oven/bun-, got: {name}"
+        );
+        // On musl targets, the package name should contain "-musl"
+        #[cfg(target_env = "musl")]
+        assert!(
+            name.ends_with("-musl"),
+            "On musl targets, package name should end with -musl, got: {name}"
         );
     }
 }
