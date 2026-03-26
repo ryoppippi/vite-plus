@@ -296,7 +296,7 @@ vp config
 │   • Interactive terminal (not CI, not piped)
 │   • First run (hook shims don't exist yet)
 │   • No --hooks-dir flag
-│   • Not running from prepare lifecycle
+│   • Not running from lifecycle script (prepare/postinstall)
 │   • No staged config in vite.config.ts          ← NEW (#1154)
 │
 │   YES → Prompt "Set up pre-commit hooks?"
@@ -317,7 +317,7 @@ vp config
 
 | Caller                                | Prompts? | Why                                              |
 | ------------------------------------- | -------- | ------------------------------------------------ |
-| `npm install` → prepare               | No       | prepare lifecycle = auto-install                 |
+| `npm install` → prepare/postinstall   | No       | lifecycle script = auto-install                  |
 | Manual, project has `staged` config   | No       | staged config = already opted in **(#1154 fix)** |
 | Manual, no `staged` config, first run | **Yes**  | No signal that project wants hooks               |
 | Manual, already ran before            | No       | Hook shims exist = not first run                 |

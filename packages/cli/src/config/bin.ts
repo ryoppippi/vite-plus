@@ -54,7 +54,8 @@ async function main() {
   const dir = args['hooks-dir'] as string | undefined;
   const hooksOnly = args['hooks-only'] as boolean;
   const interactive = defaultInteractive();
-  const isPrepareScript = process.env.npm_lifecycle_event === 'prepare';
+  const lifecycleEvent = process.env.npm_lifecycle_event;
+  const isLifecycleScript = lifecycleEvent === 'prepare' || lifecycleEvent === 'postinstall';
   const root = process.cwd();
 
   // --- Step 1: Hooks setup ---
@@ -66,11 +67,11 @@ async function main() {
     interactive &&
     isFirstHooksRun &&
     !dir &&
-    !isPrepareScript &&
+    !isLifecycleScript &&
     !hasStagedConfigInViteConfig(root)
   ) {
     // --hooks-dir implies agreement; only prompt when using default dir on first run
-    // prepare script implies the project opted into hooks — install automatically
+    // lifecycle script (prepare/postinstall) implies the project opted into hooks — install automatically
     // existing staged config in vite.config.ts implies the project already opted in
     shouldSetupHooks = await promptGitHooks({ interactive });
   }
