@@ -647,7 +647,6 @@ function rewritePrettierLintStagedConfigFiles(projectPath: string, report?: Migr
   rewriteToolLintStagedConfigFiles(projectPath, rewritePrettier, 'prettier', report);
 }
 
-// Remove deprecated tsconfig options from all tsconfig*.json files in the given directory.
 function cleanupDeprecatedTsconfigOptions(
   projectPath: string,
   silent = false,
