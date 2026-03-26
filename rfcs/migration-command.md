@@ -611,7 +611,7 @@ During migration, `vp migrate` scans all `tsconfig*.json` files in the project d
 
 **Currently removed options**:
 
-- `"esModuleInterop": false` — This option has been removed by oxlint's tsgolint. When present, `vp lint --type-aware` fails with: `Option 'esModuleInterop=false' has been removed.`
+- `"esModuleInterop": false` — This option has been removed by typescript. When present, `vp lint --type-aware` fails with: `Option 'esModuleInterop=false' has been removed.`
 
 **Behavior**:
 

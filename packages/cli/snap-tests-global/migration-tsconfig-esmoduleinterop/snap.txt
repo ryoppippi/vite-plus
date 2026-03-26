@@ -5,7 +5,7 @@ VITE+ - The Unified Toolchain for the Web
 • Node <semver>  pnpm <semver>
 • 3 config updates applied
 ! Warnings:
-  - Removed `"esModuleInterop": false` from tsconfig.json — this option has been deprecated and causes oxlint type-aware lint errors. See https://github.com/oxc-project/tsgolint/issues/351
+  - Removed `"esModuleInterop": false` from tsconfig.json — this option has been deprecated. See https://github.com/oxc-project/tsgolint/issues/351, https://github.com/microsoft/TypeScript/issues/62529
 
 > cat tsconfig.json # verify esModuleInterop: false is removed
 {

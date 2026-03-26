@@ -662,7 +662,7 @@ function cleanupDeprecatedTsconfigOptions(
         prompts.log.success(`✔ Removed esModuleInterop: false from ${displayRelative(filePath)}`);
       }
       warnMigration(
-        `Removed \`"esModuleInterop": false\` from ${displayRelative(filePath)} — this option has been deprecated and causes oxlint type-aware lint errors. See https://github.com/oxc-project/tsgolint/issues/351`,
+        `Removed \`"esModuleInterop": false\` from ${displayRelative(filePath)} — this option has been deprecated. See https://github.com/oxc-project/tsgolint/issues/351, https://github.com/microsoft/TypeScript/issues/62529`,
         report,
       );
     }
