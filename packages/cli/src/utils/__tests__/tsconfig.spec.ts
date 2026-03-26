@@ -57,35 +57,42 @@ describe('removeEsModuleInteropFalseFromFile', () => {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it('removes esModuleInterop: false', () => {
-    const filePath = path.join(tmpDir, 'tsconfig.json');
-    fs.writeFileSync(
-      filePath,
-      JSON.stringify(
-        {
-          compilerOptions: {
-            target: 'ES2023',
-            esModuleInterop: false,
-            strict: true,
-          },
-        },
-        null,
-        2,
-      ),
-    );
-
+  function writeAndRemove(filePath: string, content: string): string {
+    fs.writeFileSync(filePath, content);
     const result = removeEsModuleInteropFalseFromFile(filePath);
     expect(result).toBe(true);
+    return fs.readFileSync(filePath, 'utf-8');
+  }
 
-    const content = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    expect(content.compilerOptions).not.toHaveProperty('esModuleInterop');
-    expect(content.compilerOptions.target).toBe('ES2023');
-    expect(content.compilerOptions.strict).toBe(true);
+  it('removes esModuleInterop: false (middle property)', () => {
+    const filePath = path.join(tmpDir, 'tsconfig.json');
+    expect(
+      writeAndRemove(
+        filePath,
+        `{
+  "compilerOptions": {
+    "target": "ES2023",
+    "esModuleInterop": false,
+    "strict": true
+  }
+}`,
+      ),
+    ).toMatchInlineSnapshot(`
+      "{
+        "compilerOptions": {
+          "target": "ES2023",
+          "strict": true
+        }
+      }"
+    `);
   });
 
   it('preserves comments in JSONC', () => {
     const filePath = path.join(tmpDir, 'tsconfig.json');
-    const content = `{
+    expect(
+      writeAndRemove(
+        filePath,
+        `{
   // This is a comment
   "compilerOptions": {
     "target": "ES2023",
@@ -93,37 +100,79 @@ describe('removeEsModuleInteropFalseFromFile', () => {
     /* block comment */
     "strict": true
   }
-}
-`;
-    fs.writeFileSync(filePath, content);
-
-    const result = removeEsModuleInteropFalseFromFile(filePath);
-    expect(result).toBe(true);
-
-    const newContent = fs.readFileSync(filePath, 'utf-8');
-    expect(newContent).toContain('// This is a comment');
-    expect(newContent).toContain('/* block comment */');
-    expect(newContent).not.toContain('esModuleInterop');
-    expect(newContent).toContain('"strict": true');
+}`,
+      ),
+    ).toMatchInlineSnapshot(`
+      "{
+        // This is a comment
+        "compilerOptions": {
+          "target": "ES2023",
+          /* block comment */
+          "strict": true
+        }
+      }"
+    `);
   });
 
-  it('handles esModuleInterop: false as last property (trailing comma on previous line is valid JSONC)', () => {
+  it('handles esModuleInterop: false as last property', () => {
     const filePath = path.join(tmpDir, 'tsconfig.json');
-    const content = `{
+    expect(
+      writeAndRemove(
+        filePath,
+        `{
   "compilerOptions": {
     "target": "ES2023",
     "esModuleInterop": false
   }
-}
-`;
-    fs.writeFileSync(filePath, content);
+}`,
+      ),
+    ).toMatchInlineSnapshot(`
+      "{
+        "compilerOptions": {
+          "target": "ES2023"
+        }
+      }"
+    `);
+  });
 
-    const result = removeEsModuleInteropFalseFromFile(filePath);
-    expect(result).toBe(true);
+  it('handles inline block comment next to esModuleInterop: false', () => {
+    const filePath = path.join(tmpDir, 'tsconfig.json');
+    expect(
+      writeAndRemove(
+        filePath,
+        `{
+  "compilerOptions": {
+    "target": "ES2023",
+    "esModuleInterop": false /* reason */,
+    "strict": true
+  }
+}`,
+      ),
+    ).toMatchInlineSnapshot(`
+      "{
+        "compilerOptions": {
+          "target": "ES2023" /* reason */,
+          "strict": true
+        }
+      }"
+    `);
+  });
 
-    const newContent = fs.readFileSync(filePath, 'utf-8');
-    expect(newContent).not.toContain('esModuleInterop');
-    expect(newContent).toContain('"target": "ES2023"');
+  it('handles compact single-line JSON', () => {
+    const filePath = path.join(tmpDir, 'tsconfig.json');
+    expect(
+      writeAndRemove(filePath, '{"compilerOptions":{"esModuleInterop": false, "strict": true}}'),
+    ).toMatchInlineSnapshot(`"{"compilerOptions":{"strict": true}}"`);
+  });
+
+  it('handles compact single-line JSONC with spaces', () => {
+    const filePath = path.join(tmpDir, 'tsconfig.json');
+    expect(
+      writeAndRemove(
+        filePath,
+        '{ "compilerOptions": { "esModuleInterop": false, "strict": true } }',
+      ),
+    ).toMatchInlineSnapshot(`"{ "compilerOptions": {"strict": true } }"`);
   });
 
   it('leaves esModuleInterop: true untouched', () => {

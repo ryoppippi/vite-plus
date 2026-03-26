@@ -34,7 +34,8 @@ export function findTsconfigFiles(projectPath: string): string[] {
 
 // jsonc-parser is in dependencies (not devDependencies) so it's available at
 // runtime for tsc-compiled code (init-config.ts imports this file).
-// TODO: move back to devDependencies once the bundle refactoring lands (#744).
+// TODO: move back to devDependencies once the bundle refactoring lands
+// https://github.com/voidzero-dev/vite-plus/issues/744
 export function removeEsModuleInteropFalseFromFile(filePath: string): boolean {
   let text: string;
   try {
