@@ -292,8 +292,7 @@ jobs:
           - name: bun-vite-template
             node-version: 24
             command: |
-              vp run build
-              vp run test
+              vp run validate
         exclude:
           # frm-stack uses Docker (testcontainers) which doesn't work the same way on Windows
           - os: windows-latest

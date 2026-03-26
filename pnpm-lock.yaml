@@ -343,6 +343,9 @@ importers:
       cross-spawn:
         specifier: 'catalog:'
         version: 7.0.6
+      jsonc-parser:
+        specifier: 'catalog:'
+        version: 3.3.1
       oxfmt:
         specifier: 'catalog:'
         version: 0.42.0
@@ -389,9 +392,6 @@ importers:
       glob:
         specifier: 'catalog:'
         version: 13.0.0
-      jsonc-parser:
-        specifier: 'catalog:'
-        version: 3.3.1
       lint-staged:
         specifier: 'catalog:'
         version: 16.4.0
@@ -3821,11 +3821,6 @@ packages:
     cpu: [x64]
     os: [darwin]
 
-  '@oxlint-tsgolint/darwin-x64@0.17.4':
-    resolution: {integrity: sha512-EY2wmHWqkz72B0/ddMiAM564ZXpEuN1i7JqJJhLmDUQfiHX0/X0EqK3xlSScMCFcVicitOxbKO9oqbde3658yg==}
-    cpu: [x64]
-    os: [darwin]
-
   '@oxlint-tsgolint/linux-arm64@0.17.1':
     resolution: {integrity: sha512-BJxQ7/cdo2dNdGIBs2PIR6BaPA7cPfe+r1HE/uY+K7g2ygip+0LHB3GUO9GaNDZuWpsnDyjLYYowEGrVK8dokA==}
     cpu: [arm64]
@@ -5426,7 +5421,6 @@ packages:
   basic-ftp@5.0.5:
     resolution: {integrity: sha512-4Bcg1P8xhUuqcii/S0Z9wiHIrQVPMermM1any+MX5GeGD7faD3/msQUDGLol9wOcz4/jbg/WJnGqoJF6LiBdtg==}
     engines: {node: '>=10.0.0'}
-    deprecated: Security vulnerability fixed in 5.2.0, please upgrade
 
   before-after-hook@4.0.0:
     resolution: {integrity: sha512-q6tR3RPqIB1pMiTRMFcZwuG5T8vwp+vUvEG0vuI6B+Rikh5BfPp2fQ82c925FOs+b0lcFQ8CFrL+KbilfZFhOQ==}
@@ -11116,9 +11110,6 @@ snapshots:
   '@oxlint-tsgolint/darwin-x64@0.17.1':
     optional: true
 
-  '@oxlint-tsgolint/darwin-x64@0.17.4':
-    optional: true
-
   '@oxlint-tsgolint/linux-arm64@0.17.1':
     optional: true
 
@@ -14615,7 +14606,6 @@ snapshots:
   oxlint-tsgolint@0.17.4:
     optionalDependencies:
       '@oxlint-tsgolint/darwin-arm64': 0.17.4
-      '@oxlint-tsgolint/darwin-x64': 0.17.4
       '@oxlint-tsgolint/linux-arm64': 0.17.4
       '@oxlint-tsgolint/linux-x64': 0.17.4
       '@oxlint-tsgolint/win32-arm64': 0.17.4

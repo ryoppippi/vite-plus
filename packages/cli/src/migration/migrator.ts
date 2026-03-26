@@ -28,7 +28,11 @@ import { editJsonFile, isJsonFile, readJsonFile } from '../utils/json.js';
 import { detectPackageMetadata } from '../utils/package.js';
 import { displayRelative, rulesDir } from '../utils/path.js';
 import { getSpinner } from '../utils/prompts.js';
-import { hasBaseUrlInTsconfig } from '../utils/tsconfig.js';
+import {
+  findTsconfigFiles,
+  hasBaseUrlInTsconfig,
+  removeEsModuleInteropFalseFromFile,
+} from '../utils/tsconfig.js';
 import { editYamlFile, scalarString, type YamlDocument } from '../utils/yaml.js';
 import {
   PRETTIER_CONFIG_FILES,
@@ -644,6 +648,32 @@ function rewritePrettierLintStagedConfigFiles(projectPath: string, report?: Migr
 }
 
 /**
+ * Remove deprecated tsconfig options (e.g. esModuleInterop: false) from all
+ * tsconfig*.json files in the given directory.
+ */
+function cleanupDeprecatedTsconfigOptions(
+  projectPath: string,
+  silent = false,
+  report?: MigrationReport,
+): void {
+  const files = findTsconfigFiles(projectPath);
+  for (const filePath of files) {
+    if (removeEsModuleInteropFalseFromFile(filePath)) {
+      if (report) {
+        report.removedConfigCount++;
+      }
+      if (!silent) {
+        prompts.log.success(`✔ Removed esModuleInterop: false from ${displayRelative(filePath)}`);
+      }
+      warnMigration(
+        `Removed \`"esModuleInterop": false\` from ${displayRelative(filePath)} — this option has been deprecated and causes oxlint type-aware lint errors. See https://github.com/oxc-project/tsgolint/issues/351`,
+        report,
+      );
+    }
+  }
+}
+
+/**
  * Rewrite standalone project to add vite-plus dependencies
  * @param projectPath - The path to the project
  */
@@ -724,6 +754,7 @@ export function rewriteStandaloneProject(
   if (!skipStagedMigration) {
     rewriteLintStagedConfigFile(projectPath, report);
   }
+  cleanupDeprecatedTsconfigOptions(projectPath, silent, report);
   mergeViteConfigFiles(projectPath, silent, report);
   injectLintTypeCheckDefaults(projectPath, silent, report);
   injectFmtDefaults(projectPath, silent, report);
@@ -772,6 +803,7 @@ export function rewriteMonorepo(
   if (!skipStagedMigration) {
     rewriteLintStagedConfigFile(workspaceInfo.rootDir, report);
   }
+  cleanupDeprecatedTsconfigOptions(workspaceInfo.rootDir, silent, report);
   mergeViteConfigFiles(workspaceInfo.rootDir, silent, report);
   injectLintTypeCheckDefaults(workspaceInfo.rootDir, silent, report);
   injectFmtDefaults(workspaceInfo.rootDir, silent, report);
@@ -793,6 +825,7 @@ export function rewriteMonorepoProject(
   silent = false,
   report?: MigrationReport,
 ): void {
+  cleanupDeprecatedTsconfigOptions(projectPath, silent, report);
   mergeViteConfigFiles(projectPath, silent, report);
   mergeTsdownConfigFile(projectPath, silent, report);
 
