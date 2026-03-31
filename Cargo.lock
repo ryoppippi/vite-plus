@@ -7419,6 +7419,7 @@ dependencies = [
  "rustls",
  "serde",
  "serde_json",
+ "serial_test",
  "supports-color 3.0.2",
  "tracing-subscriber",
  "vite_path",
