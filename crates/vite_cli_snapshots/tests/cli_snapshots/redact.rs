@@ -109,6 +109,14 @@ static MANAGED_TEST_VERSION_RE: LazyLock<regex::Regex> = LazyLock::new(|| {
     )
     .unwrap()
 });
+// `vp env which` prints the resolving runtime as a labelled `Node:` field, and
+// the npm shim records the node it ran under into a BinConfig's
+// `"nodeVersion"` value. Both track the environment's managed default (not a
+// fixture pin), so they churn with runtime upgrades; mask by label/key context
+// so fixture-pinned versions elsewhere stay assertable.
+static WHICH_NODE_VERSION_RE: LazyLock<regex::Regex> = LazyLock::new(|| {
+    regex::Regex::new(r#"(Node:\s+|"nodeVersion":\s*")\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?"#).unwrap()
+});
 // Output bytes differ across OSes (line endings, embedded paths), so byte
 // sizes and content-derived asset hashes can never be part of a shared
 // snapshot. The unit is kept ("<size> kB"): it only changes when content
@@ -276,6 +284,10 @@ pub fn redact_output(
     // catalogs/overrides (see MANAGED_TEST_VERSION_RE), which bump on bundle
     // refresh like the vite-plus version.
     output = MANAGED_TEST_VERSION_RE.replace_all(&output, "${1}<version>").into_owned();
+
+    // Redact the environment's managed default runtime version by label/key
+    // context (see WHICH_NODE_VERSION_RE).
+    output = WHICH_NODE_VERSION_RE.replace_all(&output, "${1}<version>").into_owned();
 
     // Redact thread counts like "16 threads" to "<n> threads"
     output = THREAD_RE.replace_all(&output, "<n> threads").into_owned();
